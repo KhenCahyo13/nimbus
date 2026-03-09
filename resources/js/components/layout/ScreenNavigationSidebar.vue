@@ -15,7 +15,13 @@ import {
     AppSidebarMenuItem,
     type SidebarProps,
 } from '@/components/base/sidebar';
-import { BookOpenIcon, GithubIcon, SettingsIcon, TerminalIcon } from 'lucide-vue-next';
+import {
+    BookOpenIcon,
+    GithubIcon,
+    Layers3Icon,
+    SettingsIcon,
+    TerminalIcon,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -52,6 +58,12 @@ const coreItems = [
         title: 'Settings',
         route: { name: 'settings' },
         icon: SettingsIcon,
+        isActive: false,
+    },
+    {
+        title: 'Environment',
+        route: { name: 'environment' },
+        icon: Layers3Icon,
         isActive: false,
     },
 ];

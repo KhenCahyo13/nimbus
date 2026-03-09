@@ -3,6 +3,11 @@
  */
 
 export { generateCurlCommand } from './curl-generator';
+export {
+    resolveEnvironmentVariables,
+    resolveEnvironmentVariablesInBody,
+    resolveEnvironmentVariablesInParameters,
+} from './environment-variable-resolver';
 export { buildRequestUrl } from './request-url-builder';
 export {
     createRequestTimer,

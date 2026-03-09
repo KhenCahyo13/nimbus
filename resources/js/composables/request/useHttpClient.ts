@@ -6,8 +6,13 @@ import type {
     RelayProxyResponse,
     Response,
 } from '@/interfaces/http';
-import { useConfigStore } from '@/stores';
+import { useConfigStore, useEnvironmentVariablesStore } from '@/stores';
 import { convertPayloadToFormData, getStatusGroup } from '@/utils/http';
+import {
+    resolveEnvironmentVariables,
+    resolveEnvironmentVariablesInBody,
+    resolveEnvironmentVariablesInParameters,
+} from '@/utils/request/environment-variable-resolver';
 import { generateContentTypeHeader } from '@/utils/request/content-type-header-generator';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
@@ -34,6 +39,7 @@ export function useHttpClient(): UseHttpClientResult {
      */
 
     const configStore = useConfigStore();
+    const environmentVariablesStore = useEnvironmentVariablesStore();
 
     /*
      * State.
@@ -48,14 +54,18 @@ export function useHttpClient(): UseHttpClientResult {
 
     const buildRequestUrl = (request: PendingRequest): string => {
         const baseUrl = configStore.apiUrl;
+        const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
 
         // Remove leading slashes to prevent double slashes in final URL
-        const endpoint = request.endpoint.replace(/^\/+/, '');
+        const endpoint = resolveEnvironmentVariables(
+            request.endpoint,
+            activeVariables,
+        ).replace(/^\/+/, '');
 
         const url = new URL(`${baseUrl}/${endpoint}`);
 
         // Only append enabled parameters with non-empty keys to avoid malformed URLs
-        request.queryParameters
+        resolveEnvironmentVariablesInParameters(request.queryParameters, activeVariables)
             .filter(
                 (parameter: ParameterContract) =>
                     parameter.enabled && parameter.key.trim(),
@@ -80,11 +90,17 @@ export function useHttpClient(): UseHttpClientResult {
     };
 
     const createRelayPayload = (request: PendingRequest) => {
+        const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
+        const resolvedHeaders = resolveEnvironmentVariablesInParameters(
+            request.headers,
+            activeVariables,
+        );
+
         // Generate Content-Type header just before making the request
         // This ensures the correct header is sent without persisting it in the store
         const headersWithContentType = generateContentTypeHeader(
             request.payloadType,
-            request.headers
+            resolvedHeaders
                 .filter(
                     (parameter: ParameterContract) =>
                         parameter.enabled && parameter.key.trim() !== '',
@@ -102,7 +118,10 @@ export function useHttpClient(): UseHttpClientResult {
             method: request.method,
             headers: headersWithContentType,
             authorization: request.authorization,
-            body: getMemoizedBody(request),
+            body: resolveEnvironmentVariablesInBody(
+                getMemoizedBody(request),
+                activeVariables,
+            ),
         };
     };
 

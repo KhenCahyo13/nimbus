@@ -165,12 +165,12 @@ const handleDeleteParameter = (index: number) => {
                 :class="{
                     '!text-destructive hover:text-destructive/90': deletingAll,
                 }"
-                :disabled="parameters.length === 0"
+                :disabled="parameters.length <= 1"
                 data-testid="delete-all-button"
                 @click="deleteAllParameters"
             >
                 <Trash2Icon />
-                Delete All
+                {{ deletingAll ? 'Confirm Delete All' : 'Delete All' }}
             </AppButton>
         </div>
 
