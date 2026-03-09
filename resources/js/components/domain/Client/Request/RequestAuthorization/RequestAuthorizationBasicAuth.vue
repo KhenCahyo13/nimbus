@@ -6,6 +6,7 @@
 import { AppInput } from '@/components/base/input';
 import { useEnvironmentVariablesStore } from '@/stores';
 import {
+    createEnvironmentVariablesMap,
     EnvironmentPlaceholderStatus,
     getEnvironmentPlaceholderStatus,
 } from '@/utils/request';
@@ -47,17 +48,30 @@ const model = defineModel<AppRequestAuthorizationBasicAuthModel>({
 const username = ref(model.value.username);
 const password = ref(model.value.password);
 const environmentVariablesStore = useEnvironmentVariablesStore();
+const activeVariablesMap = computed(() =>
+    createEnvironmentVariablesMap(
+        environmentVariablesStore.activeCollection?.variables ?? [],
+    ),
+);
 
 const usernamePlaceholderStatus = computed(() => {
     const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
 
-    return getEnvironmentPlaceholderStatus(username.value, activeVariables);
+    return getEnvironmentPlaceholderStatus(
+        username.value,
+        activeVariables,
+        activeVariablesMap.value,
+    );
 });
 
 const passwordPlaceholderStatus = computed(() => {
     const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
 
-    return getEnvironmentPlaceholderStatus(password.value, activeVariables);
+    return getEnvironmentPlaceholderStatus(
+        password.value,
+        activeVariables,
+        activeVariablesMap.value,
+    );
 });
 
 /*

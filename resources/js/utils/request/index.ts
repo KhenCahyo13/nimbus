@@ -4,6 +4,7 @@
 
 export { generateCurlCommand } from './curl-generator';
 export {
+    createEnvironmentVariablesMap,
     EnvironmentPlaceholderStatus,
     getEnvironmentPlaceholderStatus,
     resolveEnvironmentVariables,

@@ -1,5 +1,6 @@
 import { jsonLinter } from '@/components/domain/CodeEditor/jsonLinter';
 import {
+    createEnvironmentVariablesMap,
     EnvironmentPlaceholderStatus,
     type EnvironmentSubstitutionVariable,
     getEnvironmentPlaceholderStatus,
@@ -50,6 +51,7 @@ export const environmentPlaceholderHighlightExtension = (
     return linter(view => {
         const diagnostics: Diagnostic[] = [];
         const text = view.state.doc.toString();
+        const variablesMap = createEnvironmentVariablesMap(variables);
 
         for (const match of text.matchAll(placeholderPattern)) {
             const from = match.index;
@@ -59,7 +61,11 @@ export const environmentPlaceholderHighlightExtension = (
                 continue;
             }
 
-            const status = getEnvironmentPlaceholderStatus(value, variables);
+            const status = getEnvironmentPlaceholderStatus(
+                value,
+                variables,
+                variablesMap,
+            );
 
             if (status === EnvironmentPlaceholderStatus.None) {
                 continue;

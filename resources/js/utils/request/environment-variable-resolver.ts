@@ -6,6 +6,8 @@ export interface EnvironmentSubstitutionVariable {
     enabled: boolean;
 }
 
+export type EnvironmentVariablesMap = Map<string, string>;
+
 export enum EnvironmentPlaceholderStatus {
     None = 'none',
     Missing = 'missing',
@@ -15,9 +17,9 @@ export enum EnvironmentPlaceholderStatus {
 
 const PLACEHOLDER_PATTERN = /{{\s*([^{}]+?)\s*}}/g;
 
-const buildVariablesMap = (
+export const createEnvironmentVariablesMap = (
     variables: EnvironmentSubstitutionVariable[],
-): Map<string, string> => {
+): EnvironmentVariablesMap => {
     return new Map(
         variables
             .filter(variable => variable.enabled && variable.key.trim() !== '')
@@ -34,6 +36,7 @@ const extractPlaceholderKeys = (value: string): string[] => {
 export const getEnvironmentPlaceholderStatus = (
     value: string,
     variables: EnvironmentSubstitutionVariable[],
+    variablesMap: EnvironmentVariablesMap | null = null,
 ): EnvironmentPlaceholderStatus => {
     const keys = extractPlaceholderKeys(value);
 
@@ -41,16 +44,16 @@ export const getEnvironmentPlaceholderStatus = (
         return EnvironmentPlaceholderStatus.None;
     }
 
-    const variablesMap = buildVariablesMap(variables);
+    const currentVariablesMap = variablesMap ?? createEnvironmentVariablesMap(variables);
 
     for (const key of keys) {
-        if (!variablesMap.has(key)) {
+        if (!currentVariablesMap.has(key)) {
             return EnvironmentPlaceholderStatus.Missing;
         }
     }
 
     for (const key of keys) {
-        if ((variablesMap.get(key) ?? '') === '') {
+        if ((currentVariablesMap.get(key) ?? '') === '') {
             return EnvironmentPlaceholderStatus.Empty;
         }
     }
@@ -61,17 +64,18 @@ export const getEnvironmentPlaceholderStatus = (
 export const resolveEnvironmentVariables = (
     value: string,
     variables: EnvironmentSubstitutionVariable[],
+    variablesMap: EnvironmentVariablesMap | null = null,
 ): string => {
     if (!value.includes('{{')) {
         return value;
     }
 
-    const variablesMap = buildVariablesMap(variables);
+    const currentVariablesMap = variablesMap ?? createEnvironmentVariablesMap(variables);
 
     return value.replace(PLACEHOLDER_PATTERN, (match, key) => {
         const normalizedKey = String(key).trim();
 
-        return variablesMap.get(normalizedKey) ?? match;
+        return currentVariablesMap.get(normalizedKey) ?? match;
     });
 };
 
@@ -79,9 +83,11 @@ export const resolveEnvironmentVariablesInParameters = (
     parameters: ParameterContract[],
     variables: EnvironmentSubstitutionVariable[],
 ): ParameterContract[] => {
+    const variablesMap = createEnvironmentVariablesMap(variables);
+
     return parameters.map(parameter => ({
         ...parameter,
-        value: resolveEnvironmentVariables(parameter.value, variables),
+        value: resolveEnvironmentVariables(parameter.value, variables, variablesMap),
     }));
 };
 
@@ -89,8 +95,10 @@ export const resolveEnvironmentVariablesInBody = (
     body: FormData | string | null,
     variables: EnvironmentSubstitutionVariable[],
 ): FormData | string | null => {
+    const variablesMap = createEnvironmentVariablesMap(variables);
+
     if (typeof body === 'string') {
-        return resolveEnvironmentVariables(body, variables);
+        return resolveEnvironmentVariables(body, variables, variablesMap);
     }
 
     if (!(body instanceof FormData)) {
@@ -101,7 +109,10 @@ export const resolveEnvironmentVariablesInBody = (
 
     body.forEach((value, key) => {
         if (typeof value === 'string') {
-            resolved.append(key, resolveEnvironmentVariables(value, variables));
+            resolved.append(
+                key,
+                resolveEnvironmentVariables(value, variables, variablesMap),
+            );
 
             return;
         }

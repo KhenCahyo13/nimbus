@@ -6,6 +6,7 @@
 import { AppInput } from '@/components/base/input';
 import { useEnvironmentVariablesStore } from '@/stores';
 import {
+    createEnvironmentVariablesMap,
     EnvironmentPlaceholderStatus,
     getEnvironmentPlaceholderStatus,
 } from '@/utils/request';
@@ -28,11 +29,20 @@ const model: ModelRef<string> = defineModel<string>({
 });
 
 const environmentVariablesStore = useEnvironmentVariablesStore();
+const activeVariablesMap = computed(() =>
+    createEnvironmentVariablesMap(
+        environmentVariablesStore.activeCollection?.variables ?? [],
+    ),
+);
 
 const modelPlaceholderStatus = computed(() => {
     const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
 
-    return getEnvironmentPlaceholderStatus(model.value, activeVariables);
+    return getEnvironmentPlaceholderStatus(
+        model.value,
+        activeVariables,
+        activeVariablesMap.value,
+    );
 });
 </script>
 

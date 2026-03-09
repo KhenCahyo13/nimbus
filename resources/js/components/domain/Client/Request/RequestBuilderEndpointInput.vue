@@ -14,6 +14,7 @@ import { useRoutePlaceholderDetection } from '@/composables/request/useRoutePlac
 import { useRouteSegmentSelection } from '@/composables/request/useRouteSegmentSelection';
 import { useEnvironmentVariablesStore, useRequestStore } from '@/stores';
 import {
+    createEnvironmentVariablesMap,
     EnvironmentPlaceholderStatus,
     getEnvironmentPlaceholderStatus,
 } from '@/utils/request';
@@ -46,10 +47,19 @@ const endpoint = computed({
 });
 
 const { placeholders, hasPlaceholders } = useRoutePlaceholderDetection(endpoint);
+const activeVariablesMap = computed(() =>
+    createEnvironmentVariablesMap(
+        environmentVariablesStore.activeCollection?.variables ?? [],
+    ),
+);
 const endpointPlaceholderStatus = computed(() => {
     const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
 
-    return getEnvironmentPlaceholderStatus(endpoint.value, activeVariables);
+    return getEnvironmentPlaceholderStatus(
+        endpoint.value,
+        activeVariables,
+        activeVariablesMap.value,
+    );
 });
 
 const { handleClick: autoSelectRouteVariableSegmentWhenApplicable } =
