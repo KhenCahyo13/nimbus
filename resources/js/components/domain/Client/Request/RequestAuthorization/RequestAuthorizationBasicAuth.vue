@@ -4,7 +4,12 @@
  * @description Input fields for Basic Authentication (username/password).
  */
 import { AppInput } from '@/components/base/input';
-import { ref, watch } from 'vue';
+import { useEnvironmentVariablesStore } from '@/stores';
+import {
+    EnvironmentPlaceholderStatus,
+    getEnvironmentPlaceholderStatus,
+} from '@/utils/request';
+import { computed, ref, watch } from 'vue';
 
 /*
  * Types & Interfaces.
@@ -41,6 +46,19 @@ const model = defineModel<AppRequestAuthorizationBasicAuthModel>({
 
 const username = ref(model.value.username);
 const password = ref(model.value.password);
+const environmentVariablesStore = useEnvironmentVariablesStore();
+
+const usernamePlaceholderStatus = computed(() => {
+    const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
+
+    return getEnvironmentPlaceholderStatus(username.value, activeVariables);
+});
+
+const passwordPlaceholderStatus = computed(() => {
+    const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
+
+    return getEnvironmentPlaceholderStatus(password.value, activeVariables);
+});
 
 /*
  * Watchers.
@@ -70,6 +88,14 @@ watch(password, newValue => {
             v-model="username"
             placeholder="-"
             class="col-span-2 h-full rounded-none border-0 text-xs shadow-none focus:ring-0 focus-visible:ring-0"
+            :class="{
+                'text-destructive':
+                    usernamePlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
+                'text-warning':
+                    usernamePlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
+                'text-primary':
+                    usernamePlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
+            }"
         />
     </div>
     <div class="grid h-8 grid-cols-3 border-b">
@@ -84,6 +110,14 @@ watch(password, newValue => {
             v-model="password"
             placeholder="-"
             class="col-span-2 h-full rounded-none border-0 text-xs shadow-none focus:ring-0 focus-visible:ring-0"
+            :class="{
+                'text-destructive':
+                    passwordPlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
+                'text-warning':
+                    passwordPlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
+                'text-primary':
+                    passwordPlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
+            }"
         />
     </div>
 </template>

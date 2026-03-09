@@ -12,7 +12,11 @@ import {
 } from '@/components/base/popover';
 import { useRoutePlaceholderDetection } from '@/composables/request/useRoutePlaceholderDetection';
 import { useRouteSegmentSelection } from '@/composables/request/useRouteSegmentSelection';
-import { useRequestStore } from '@/stores';
+import { useEnvironmentVariablesStore, useRequestStore } from '@/stores';
+import {
+    EnvironmentPlaceholderStatus,
+    getEnvironmentPlaceholderStatus,
+} from '@/utils/request';
 import { CornerDownLeftIcon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import RequestBuilderEndpointPlaceholderWarningContent from './RequestBuilderEndpointPlaceholderWarningContent.vue';
@@ -22,6 +26,7 @@ import RequestBuilderEndpointPlaceholderWarningContent from './RequestBuilderEnd
  */
 
 const requestStore = useRequestStore();
+const environmentVariablesStore = useEnvironmentVariablesStore();
 
 /*
  * State.
@@ -41,6 +46,11 @@ const endpoint = computed({
 });
 
 const { placeholders, hasPlaceholders } = useRoutePlaceholderDetection(endpoint);
+const endpointPlaceholderStatus = computed(() => {
+    const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
+
+    return getEnvironmentPlaceholderStatus(endpoint.value, activeVariables);
+});
 
 const { handleClick: autoSelectRouteVariableSegmentWhenApplicable } =
     useRouteSegmentSelection({ endpoint });
@@ -77,6 +87,11 @@ const executeCurrentRequestWhenEnterIsPressed = (event: KeyboardEvent) => {
             v-model="endpoint"
             variant="toolbar"
             class="h-full flex-1 text-xs"
+            :class="{
+                'text-destructive': endpointPlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
+                'text-warning': endpointPlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
+                'text-primary': endpointPlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
+            }"
             placeholder="<endpoint>"
             data-testid="endpoint-input"
             @click="autoSelectRouteVariableSegmentWhenApplicable"

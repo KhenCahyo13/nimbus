@@ -6,6 +6,13 @@ export interface EnvironmentSubstitutionVariable {
     enabled: boolean;
 }
 
+export enum EnvironmentPlaceholderStatus {
+    None = 'none',
+    Missing = 'missing',
+    Empty = 'empty',
+    Resolved = 'resolved',
+}
+
 const PLACEHOLDER_PATTERN = /{{\s*([^{}]+?)\s*}}/g;
 
 const buildVariablesMap = (
@@ -16,6 +23,39 @@ const buildVariablesMap = (
             .filter(variable => variable.enabled && variable.key.trim() !== '')
             .map(variable => [variable.key.trim(), variable.value]),
     );
+};
+
+const extractPlaceholderKeys = (value: string): string[] => {
+    return Array.from(value.matchAll(PLACEHOLDER_PATTERN)).map(match =>
+        String(match[1]).trim(),
+    );
+};
+
+export const getEnvironmentPlaceholderStatus = (
+    value: string,
+    variables: EnvironmentSubstitutionVariable[],
+): EnvironmentPlaceholderStatus => {
+    const keys = extractPlaceholderKeys(value);
+
+    if (keys.length === 0) {
+        return EnvironmentPlaceholderStatus.None;
+    }
+
+    const variablesMap = buildVariablesMap(variables);
+
+    for (const key of keys) {
+        if (!variablesMap.has(key)) {
+            return EnvironmentPlaceholderStatus.Missing;
+        }
+    }
+
+    for (const key of keys) {
+        if ((variablesMap.get(key) ?? '') === '') {
+            return EnvironmentPlaceholderStatus.Empty;
+        }
+    }
+
+    return EnvironmentPlaceholderStatus.Resolved;
 };
 
 export const resolveEnvironmentVariables = (

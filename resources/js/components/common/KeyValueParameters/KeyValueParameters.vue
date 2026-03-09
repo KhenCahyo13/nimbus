@@ -17,7 +17,11 @@ import { AppSwitch } from '@/components/base/switch';
 import { AppTooltipWrapper } from '@/components/base/tooltip';
 import { useKeyValueParameters } from '@/composables/ui/useKeyValueParameters';
 import { type ParameterContract } from '@/interfaces/ui';
-import { useValueGeneratorStore } from '@/stores';
+import { useEnvironmentVariablesStore, useValueGeneratorStore } from '@/stores';
+import {
+    EnvironmentPlaceholderStatus,
+    getEnvironmentPlaceholderStatus,
+} from '@/utils/request';
 import { cn } from '@/utils/ui';
 import {
     EyeClosedIcon,
@@ -55,6 +59,7 @@ const props = withDefaults(defineProps<AppKeyValueParametersProps>(), {
 const emit = defineEmits<AppKeyValueParametersEmits>();
 
 const { openCommand, closeCommand } = useValueGeneratorStore();
+const environmentVariablesStore = useEnvironmentVariablesStore();
 
 /*
  * Refs.
@@ -90,6 +95,14 @@ const {
 
 const shouldShowGeneratorIcon = (index: number, parameter: ParameterContract) => {
     return focusedInputIndex.value === index && parameter.enabled;
+};
+
+const getParameterValuePlaceholderStatus = (
+    parameter: ParameterContract,
+): EnvironmentPlaceholderStatus => {
+    const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
+
+    return getEnvironmentPlaceholderStatus(parameter.value, activeVariables);
 };
 
 const handleValueInputFocus = (index: number, inputRef: HTMLInputElement) => {
@@ -223,6 +236,17 @@ const handleDeleteParameter = (index: number) => {
                         v-model="parameter.value"
                         placeholder="Value"
                         class="pl-panel h-full flex-1 rounded-none border-0 border-r shadow-none focus:ring-0 focus-visible:ring-0"
+                        :class="{
+                            'text-destructive':
+                                getParameterValuePlaceholderStatus(parameter) ===
+                                EnvironmentPlaceholderStatus.Missing,
+                            'text-warning':
+                                getParameterValuePlaceholderStatus(parameter) ===
+                                EnvironmentPlaceholderStatus.Empty,
+                            'text-primary':
+                                getParameterValuePlaceholderStatus(parameter) ===
+                                EnvironmentPlaceholderStatus.Resolved,
+                        }"
                         :disabled="!parameter.enabled"
                         name="kv-value"
                         data-testid="kv-value"

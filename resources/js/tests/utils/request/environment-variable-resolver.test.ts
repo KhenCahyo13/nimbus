@@ -1,5 +1,7 @@
 import { ParameterType } from '@/interfaces/ui';
 import {
+    EnvironmentPlaceholderStatus,
+    getEnvironmentPlaceholderStatus,
     resolveEnvironmentVariables,
     resolveEnvironmentVariablesInBody,
     resolveEnvironmentVariablesInParameters,
@@ -60,5 +62,29 @@ describe('environment-variable-resolver', () => {
 
         expect(urlValue).toBe('https://localhost/ping');
         expect(plainValue).toBe('keep');
+    });
+
+    it('returns missing status when placeholder key does not exist', () => {
+        const status = getEnvironmentPlaceholderStatus('/api/{{missing}}', variables);
+
+        expect(status).toBe(EnvironmentPlaceholderStatus.Missing);
+    });
+
+    it('returns empty status when placeholder exists but value is empty', () => {
+        const status = getEnvironmentPlaceholderStatus('/api/{{empty}}', [
+            ...variables,
+            { key: 'empty', value: '', enabled: true },
+        ]);
+
+        expect(status).toBe(EnvironmentPlaceholderStatus.Empty);
+    });
+
+    it('returns resolved status when all placeholders are available and non-empty', () => {
+        const status = getEnvironmentPlaceholderStatus(
+            '/api/{{host}}?token={{token}}',
+            variables,
+        );
+
+        expect(status).toBe(EnvironmentPlaceholderStatus.Resolved);
     });
 });

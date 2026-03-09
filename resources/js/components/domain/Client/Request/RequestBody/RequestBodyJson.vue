@@ -4,7 +4,10 @@
  * @description JSON content editor for request bodies, with schema validation support.
  */
 import CodeEditor from '@/components/domain/CodeEditor/CodeEditor.vue';
+import { environmentPlaceholderHighlightExtension } from '@/components/domain/CodeEditor/extensions';
+import { useEnvironmentVariablesStore } from '@/stores';
 import type { JSONSchema7 } from 'json-schema';
+import { computed } from 'vue';
 
 /*
  * Types & Interfaces.
@@ -23,6 +26,14 @@ defineProps<AppRequestBodyJsonProps>();
 const model = defineModel<string>({
     default: () => '',
 });
+
+const environmentVariablesStore = useEnvironmentVariablesStore();
+
+const customExtensions = computed(() => {
+    const variables = environmentVariablesStore.activeCollection?.variables ?? [];
+
+    return [environmentPlaceholderHighlightExtension(variables)];
+});
 </script>
 
 <template>
@@ -32,5 +43,6 @@ const model = defineModel<string>({
         :readonly="false"
         placeholder="Your JSON Payload"
         :validation-schema="schema"
+        :custom-extensions="customExtensions"
     />
 </template>

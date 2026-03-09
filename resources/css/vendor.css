@@ -33,6 +33,18 @@
         color: var(--color-subtle-foreground) !important;
     }
 
+    .cm-line span.cm-env-placeholder-missing {
+        color: var(--color-destructive) !important;
+    }
+
+    .cm-line span.cm-env-placeholder-empty {
+        color: var(--color-warning) !important;
+    }
+
+    .cm-line span.cm-env-placeholder-resolved {
+        color: var(--color-primary) !important;
+    }
+
     .cm-tooltip-lint {
         background-color: var(--color-popover) !important;
         border: 1px solid var(--color-border) !important;

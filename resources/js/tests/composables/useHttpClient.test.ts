@@ -25,6 +25,11 @@ const mockConfigStore = {
 
 vi.mock('@/stores', () => ({
     useConfigStore: () => mockConfigStore,
+    useEnvironmentVariablesStore: () => ({
+        activeCollection: {
+            variables: [],
+        },
+    }),
 }));
 
 describe('useHttpClient', () => {
