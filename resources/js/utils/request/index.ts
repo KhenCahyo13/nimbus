@@ -6,6 +6,7 @@ export { generateCurlCommand } from './curl-generator';
 export {
     createEnvironmentVariablesMap,
     EnvironmentPlaceholderStatus,
+    type EnvironmentSubstitutionVariable,
     getEnvironmentPlaceholderStatus,
     resolveEnvironmentVariables,
     resolveEnvironmentVariablesInBody,
