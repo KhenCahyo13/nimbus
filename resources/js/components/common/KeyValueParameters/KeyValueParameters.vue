@@ -151,7 +151,7 @@ const handleDeleteParameter = (index: number) => {
                 variant="ghost"
                 size="xs"
                 class="px-panel h-full -translate-x-0.5 rounded-none text-xs"
-                :disabled="parameters.length === 0"
+                :disabled="parameters.length <= 1"
                 data-testid="enable-all-button"
                 @click="toggleAllParametersEnabledState"
             >
