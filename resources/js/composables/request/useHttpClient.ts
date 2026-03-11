@@ -2,17 +2,12 @@ import { httpClientConfig } from '@/config';
 import type { ParameterContract, RequestHeader } from '@/interfaces';
 import type {
     HttpHeaders,
-    PendingRequest,
+    Request,
     RelayProxyResponse,
     Response,
 } from '@/interfaces/http';
-import { useConfigStore, useEnvironmentVariablesStore } from '@/stores';
+import { useConfigStore } from '@/stores';
 import { convertPayloadToFormData, getStatusGroup } from '@/utils/http';
-import {
-    resolveEnvironmentVariables,
-    resolveEnvironmentVariablesInBody,
-    resolveEnvironmentVariablesInParameters,
-} from '@/utils/request/environment-variable-resolver';
 import { generateContentTypeHeader } from '@/utils/request/content-type-header-generator';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
@@ -24,9 +19,9 @@ export interface RequestResult {
 }
 
 export interface UseHttpClientResult {
-    executeRequest: (request: PendingRequest) => Promise<RequestResult | null>;
+    executeRequest: (request: Request) => Promise<RequestResult | null>;
     cancelCurrentRequest: () => void;
-    buildRequestUrl: (request: PendingRequest) => string;
+    buildRequestUrl: (request: Request) => string;
     isExecuting: DeepReadonly<Ref<boolean>>;
 }
 
@@ -39,7 +34,6 @@ export function useHttpClient(): UseHttpClientResult {
      */
 
     const configStore = useConfigStore();
-    const environmentVariablesStore = useEnvironmentVariablesStore();
 
     /*
      * State.
@@ -52,20 +46,16 @@ export function useHttpClient(): UseHttpClientResult {
      * Utilities.
      */
 
-    const buildRequestUrl = (request: PendingRequest): string => {
+    const buildRequestUrl = (request: Request): string => {
         const baseUrl = configStore.apiUrl;
-        const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
 
         // Remove leading slashes to prevent double slashes in final URL
-        const endpoint = resolveEnvironmentVariables(
-            request.endpoint,
-            activeVariables,
-        ).replace(/^\/+/, '');
+        const endpoint = request.endpoint.replace(/^\/+/, '');
 
         const url = new URL(`${baseUrl}/${endpoint}`);
 
         // Only append enabled parameters with non-empty keys to avoid malformed URLs
-        resolveEnvironmentVariablesInParameters(request.queryParameters, activeVariables)
+        request.queryParameters
             .filter(
                 (parameter: ParameterContract) =>
                     parameter.enabled && parameter.key.trim(),
@@ -77,30 +67,12 @@ export function useHttpClient(): UseHttpClientResult {
         return url.toString();
     };
 
-    /**
-     * Body is memoized by method > payload type structure for better UX (keep-alive state).
-     */
-    const getMemoizedBody = (request: PendingRequest) => {
-        // First extraction: get body for the specific HTTP method (GET, POST, etc.)
-        const body = request.body[request.method] ?? null;
-
-        // Second extraction: get body for the specific payload type (JSON, FormData, etc.)
-        // This double extraction is necessary due to the nested memoization structure
-        return body ? (body[request.payloadType] ?? null) : null;
-    };
-
-    const createRelayPayload = (request: PendingRequest) => {
-        const activeVariables = environmentVariablesStore.activeCollection?.variables ?? [];
-        const resolvedHeaders = resolveEnvironmentVariablesInParameters(
-            request.headers,
-            activeVariables,
-        );
-
+    const createRelayPayload = (request: Request) => {
         // Generate Content-Type header just before making the request
         // This ensures the correct header is sent without persisting it in the store
         const headersWithContentType = generateContentTypeHeader(
             request.payloadType,
-            resolvedHeaders
+            request.headers
                 .filter(
                     (parameter: ParameterContract) =>
                         parameter.enabled && parameter.key.trim() !== '',
@@ -118,10 +90,7 @@ export function useHttpClient(): UseHttpClientResult {
             method: request.method,
             headers: headersWithContentType,
             authorization: request.authorization,
-            body: resolveEnvironmentVariablesInBody(
-                getMemoizedBody(request),
-                activeVariables,
-            ),
+            body: request.body,
         };
     };
 
@@ -154,7 +123,7 @@ export function useHttpClient(): UseHttpClientResult {
         };
     };
 
-    const sendRequest = (request: PendingRequest): Promise<RequestResult | null> => {
+    const sendRequest = (request: Request): Promise<RequestResult | null> => {
         return new Promise<RequestResult | null>((resolve, reject) => {
             const url = configStore.appBasePath + '/api/relay';
             const payload = createRelayPayload(request);
@@ -234,7 +203,7 @@ export function useHttpClient(): UseHttpClientResult {
     };
 
     const executeRequest = async (
-        request: PendingRequest,
+        request: Request,
     ): Promise<RequestResult | null> => {
         // Prevent concurrent requests to avoid race conditions
         if (isExecuting.value) {

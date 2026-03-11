@@ -1,4 +1,5 @@
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
+import { useResolvedRequest } from '@/composables/request/useResolvedRequest';
 import { AuthorizationType } from '@/interfaces/generated';
 import type { RequestLog } from '@/interfaces/history/logs';
 import type {
@@ -12,18 +13,8 @@ import type { ShareableLinkPayload } from '@/interfaces/share';
 import type { ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui';
 import type { Tab } from '@/interfaces/ui/tabs';
-import {
-    useConfigStore,
-    useEnvironmentVariablesStore,
-    useSettingsStore,
-    useValueGeneratorStore,
-} from '@/stores';
-import {
-    buildRequestUrl,
-    getDefaultPayloadTypeForRoute,
-    resolveEnvironmentVariables,
-    resolveEnvironmentVariablesInParameters,
-} from '@/utils/request';
+import { useConfigStore, useSettingsStore, useValueGeneratorStore } from '@/stores';
+import { buildRequestUrl, getDefaultPayloadTypeForRoute } from '@/utils/request';
 import { generateValueFromType } from '@/utils/value-generator/generateValueFromType';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
@@ -41,7 +32,7 @@ export const useTabsStore = defineStore(
         const settingsStore = useSettingsStore();
         const configStore = useConfigStore();
         const valueGeneratorStore = useValueGeneratorStore();
-        const environmentVariablesStore = useEnvironmentVariablesStore();
+        const { resolveRequest } = useResolvedRequest();
 
         /*
          * State.
@@ -558,21 +549,12 @@ export const useTabsStore = defineStore(
          * Builds complete request URL with query parameters.
          */
         const getRequestUrl = (request: PendingRequest): string => {
-            const activeVariables =
-                environmentVariablesStore.activeCollection?.variables ?? [];
-            const resolvedEndpoint = resolveEnvironmentVariables(
-                request.endpoint,
-                activeVariables,
-            );
-            const resolvedQueryParameters = resolveEnvironmentVariablesInParameters(
-                request.queryParameters,
-                activeVariables,
-            );
+            const resolvedRequest = resolveRequest(request);
 
             return buildRequestUrl(
                 configStore.apiUrl,
-                resolvedEndpoint,
-                resolvedQueryParameters.filter(
+                resolvedRequest.endpoint,
+                resolvedRequest.queryParameters.filter(
                     (parameter: ParameterContract) =>
                         parameter.enabled && parameter.key.trim() !== '',
                 ),

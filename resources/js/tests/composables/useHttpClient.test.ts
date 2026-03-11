@@ -1,8 +1,8 @@
 import { useHttpClient } from '@/composables/request/useHttpClient';
 import { AuthorizationType } from '@/interfaces/generated';
+import { RequestBodyTypeEnum, type Request } from '@/interfaces/http';
 import { ParameterType } from '@/interfaces/ui';
 import {
-    createMockPendingRequest,
     createMockRelayProxyResponse,
 } from '@/tests/_utils/test-factories';
 import axios, { AxiosError } from 'axios';
@@ -25,12 +25,25 @@ const mockConfigStore = {
 
 vi.mock('@/stores', () => ({
     useConfigStore: () => mockConfigStore,
-    useEnvironmentVariablesStore: () => ({
-        activeCollection: {
-            variables: [],
-        },
-    }),
 }));
+
+const createMockRequest = (overrides: Partial<Request> = {}): Request => ({
+    method: 'GET',
+    endpoint: 'api/users',
+    headers: [],
+    body: null,
+    queryParameters: [],
+    payloadType: RequestBodyTypeEnum.EMPTY,
+    authorization: { type: AuthorizationType.None },
+    routeDefinition: {
+        endpoint: 'api/users',
+        method: 'GET',
+        shortEndpoint: 'api/users',
+        schema: { shape: {}, extractionErrors: null },
+    },
+    transactionMode: false,
+    ...overrides,
+});
 
 describe('useHttpClient', () => {
     /*
@@ -58,7 +71,7 @@ describe('useHttpClient', () => {
             // Arrange
 
             const { buildRequestUrl } = useHttpClient();
-            const request = createMockPendingRequest({
+            const request = createMockRequest({
                 endpoint: 'api/users',
                 authorization: {
                     type: AuthorizationType.None,
@@ -87,7 +100,7 @@ describe('useHttpClient', () => {
             // Arrange
 
             const { buildRequestUrl } = useHttpClient();
-            const request = createMockPendingRequest({
+            const request = createMockRequest({
                 endpoint: '//api/users',
                 authorization: {
                     type: AuthorizationType.None,
@@ -108,13 +121,16 @@ describe('useHttpClient', () => {
         it('should execute request and return correctly parsed response', async () => {
             // Arrange
 
-            const request = createMockPendingRequest({
+            const request = createMockRequest({
                 endpoint: 'api/users',
                 method: 'POST',
-                body: {
-                    POST: {
-                        json: JSON.stringify({ name: 'John' }),
-                    },
+                body: JSON.stringify({ name: 'John' }),
+                payloadType: RequestBodyTypeEnum.JSON,
+                routeDefinition: {
+                    endpoint: 'api/users',
+                    method: 'POST',
+                    shortEndpoint: 'api/users',
+                    schema: { shape: {}, extractionErrors: null },
                 },
             });
 
@@ -147,7 +163,7 @@ describe('useHttpClient', () => {
             // Arrange
 
             const { executeRequest } = useHttpClient();
-            const request = createMockPendingRequest();
+            const request = createMockRequest();
             const cancelError = new AxiosError('Request cancelled');
             cancelError.code = 'ERR_CANCELED';
 

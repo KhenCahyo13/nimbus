@@ -28,6 +28,12 @@ vi.mock('@/composables/request/useHttpClient', () => ({
     }),
 }));
 
+vi.mock('@/composables/request/useResolvedRequest', () => ({
+    useResolvedRequest: () => ({
+        resolveRequest: (request: PendingRequest) => request,
+    }),
+}));
+
 const mockRequestsHistoryStore = reactive({
     addLog: vi.fn(),
 });

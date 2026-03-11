@@ -45,6 +45,11 @@ vi.mock('@/stores', async importOriginal => {
                 return headers;
             },
         }),
+        useEnvironmentVariablesStore: () => ({
+            activeCollection: {
+                variables: [],
+            },
+        }),
         useValueGeneratorStore: () => ({
             generateValue: (type: string) => `generated-${type}`,
         }),

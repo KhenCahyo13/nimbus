@@ -1,3 +1,4 @@
+import { useResolvedRequest } from '@/composables/request/useResolvedRequest';
 import { useHttpClient } from '@/composables/request/useHttpClient';
 import type { ErrorPlainResponse, PendingRequest } from '@/interfaces/http';
 import { useRequestsHistoryStore, useTabsStore } from '@/stores';
@@ -22,6 +23,7 @@ export const useRequestExecutorStore = defineStore('_requestExecutor', () => {
 
     const historyStore = useRequestsHistoryStore();
     const tabsStore = useTabsStore();
+    const { resolveRequest } = useResolvedRequest();
     const { executeRequest, cancelCurrentRequest } = useHttpClient();
 
     /*
@@ -83,7 +85,7 @@ export const useRequestExecutorStore = defineStore('_requestExecutor', () => {
                 }
             });
 
-            const result = await executeRequest(requestData);
+            const result = await executeRequest(resolveRequest(requestData));
 
             if (result === null) {
                 // The response request didn't finish. This means the request is canceled.
