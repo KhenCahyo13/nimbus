@@ -127,30 +127,26 @@ const getValueInputClass = (parameter: ParameterContract) => {
                     </p>
 
                     <template v-else>
-                        <div class="mb-4 grid grid-cols-1 gap-2 md:grid-cols-12">
-                            <div class="md:col-span-9">
-                                <AppInput
-                                    :model-value="activeCollection.name"
-                                    placeholder="Collection name"
-                                    @update:model-value="handleCollectionNameUpdate"
-                                />
-                            </div>
+                        <div class="mb-4 flex items-center gap-2">
+                            <AppInput
+                                :model-value="activeCollection.name"
+                                placeholder="Collection name"
+                                class="flex-1"
+                                @update:model-value="handleCollectionNameUpdate"
+                            />
 
-                            <div class="md:col-span-3">
-                                <AppButton
-                                    class="w-full"
-                                    size="default"
-                                    variant="outline"
-                                    @click="
-                                        environmentVariablesStore.removeCollection(
-                                            activeCollection.id,
-                                        )
-                                    "
-                                >
-                                    <Trash2Icon />
-                                    Delete
-                                </AppButton>
-                            </div>
+                            <AppButton
+                                size="default"
+                                variant="outline"
+                                @click="
+                                    environmentVariablesStore.removeCollection(
+                                        activeCollection.id,
+                                    )
+                                "
+                            >
+                                <Trash2Icon />
+                                Delete
+                            </AppButton>
                         </div>
 
                         <KeyValueParameters
