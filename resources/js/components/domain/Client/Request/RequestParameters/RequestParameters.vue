@@ -7,7 +7,12 @@ import CopyButton from '@/components/common/CopyButton.vue';
 import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/KeyValueParameters.vue';
 import PanelSubHeader from '@/components/layout/PanelSubHeader/PanelSubHeader.vue';
 import { type ParameterContract } from '@/interfaces/ui';
-import { useRequestStore } from '@/stores';
+import { useEnvironmentVariablesStore, useRequestStore } from '@/stores';
+import {
+    createEnvironmentVariablesMap,
+    EnvironmentPlaceholderStatus,
+    getEnvironmentPlaceholderStatus,
+} from '@/utils/request';
 import { useClipboard } from '@vueuse/core';
 import { computed } from 'vue';
 
@@ -28,6 +33,7 @@ defineProps<AppRequestParametersProps>();
  */
 
 const requestStore = useRequestStore();
+const environmentVariablesStore = useEnvironmentVariablesStore();
 const { copy, copied: previewCopied } = useClipboard();
 
 /*
@@ -49,6 +55,25 @@ const handleQueryParametersUpdate = (parameters: ParameterContract[]) => {
 };
 
 const copyPreview = () => copy(preview.value);
+const activeVariables = computed(
+    () => environmentVariablesStore.activeCollection?.variables ?? [],
+);
+const activeVariablesMap = computed(() =>
+    createEnvironmentVariablesMap(activeVariables.value),
+);
+const getValueInputClass = (parameter: ParameterContract) => {
+    const status = getEnvironmentPlaceholderStatus(
+        parameter.value,
+        activeVariables.value,
+        activeVariablesMap.value,
+    );
+
+    return {
+        'text-destructive': status === EnvironmentPlaceholderStatus.Missing,
+        'text-warning': status === EnvironmentPlaceholderStatus.Empty,
+        'text-primary': status === EnvironmentPlaceholderStatus.Resolved,
+    };
+};
 </script>
 
 <template>
@@ -66,6 +91,7 @@ const copyPreview = () => copy(preview.value);
     <KeyValueParametersBuilder
         :model-value="currentRequestQueryParameters"
         class="flex-1"
+        :get-value-input-class="getValueInputClass"
         @update:parameters="handleQueryParametersUpdate"
     />
 </template>

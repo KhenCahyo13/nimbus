@@ -138,6 +138,22 @@ describe('KeyValueParameters', () => {
 
             expect(wrapper.findAll('[data-testid="type-selector"]')).toHaveLength(2);
         });
+
+        it('applies value input classes provided by the parent resolver', () => {
+            // Arrange
+
+            const wrapper = createWrapper({
+                props: {
+                    getValueInputClass: () => 'text-primary',
+                },
+            });
+
+            // Assert
+
+            expect(wrapper.findAll('[data-testid="kv-value"]')[0].classes()).toContain(
+                'text-primary',
+            );
+        });
     });
 
     /*

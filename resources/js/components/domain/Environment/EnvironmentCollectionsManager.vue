@@ -10,6 +10,12 @@ import {
 } from '@/components/base/card';
 import { AppInput } from '@/components/base/input';
 import KeyValueParameters from '@/components/common/KeyValueParameters/KeyValueParameters.vue';
+import {
+    createEnvironmentVariablesMap,
+    EnvironmentPlaceholderStatus,
+    getEnvironmentPlaceholderStatus,
+} from '@/utils/request';
+import type { ParameterContract } from '@/interfaces/ui';
 import type { EnvironmentVariable } from '@/stores/core/useEnvironmentVariablesStore';
 import { useEnvironmentVariablesStore } from '@/stores';
 import { Trash2Icon } from 'lucide-vue-next';
@@ -27,6 +33,9 @@ const activeCollectionId = computed({
 const hasCollections = computed(() => collections.value.length > 0);
 
 const activeCollectionVariables = computed(() => activeCollection.value?.variables ?? []);
+const activeVariablesMap = computed(() =>
+    createEnvironmentVariablesMap(activeCollectionVariables.value),
+);
 
 const handleCollectionNameUpdate = (name: string | number) => {
     environmentVariablesStore.updateActiveCollectionName(String(name));
@@ -38,6 +47,20 @@ const handleVariablesUpdate = (variables: EnvironmentVariable[]) => {
 
 const handleCollectionSelect = (collectionId: string) => {
     activeCollectionId.value = collectionId;
+};
+
+const getValueInputClass = (parameter: ParameterContract) => {
+    const status = getEnvironmentPlaceholderStatus(
+        parameter.value,
+        activeCollectionVariables.value,
+        activeVariablesMap.value,
+    );
+
+    return {
+        'text-destructive': status === EnvironmentPlaceholderStatus.Missing,
+        'text-warning': status === EnvironmentPlaceholderStatus.Empty,
+        'text-primary': status === EnvironmentPlaceholderStatus.Resolved,
+    };
 };
 </script>
 
@@ -132,6 +155,7 @@ const handleCollectionSelect = (collectionId: string) => {
 
                         <KeyValueParameters
                             :model-value="activeCollectionVariables"
+                            :get-value-input-class="getValueInputClass"
                             @update:parameters="handleVariablesUpdate"
                         />
                     </template>
