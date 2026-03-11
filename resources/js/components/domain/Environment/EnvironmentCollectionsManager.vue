@@ -65,7 +65,7 @@ const getValueInputClass = (parameter: ParameterContract) => {
 </script>
 
 <template>
-    <div class="h-full overflow-auto p-6">
+    <div class="h-full overflow-auto p-panel">
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <AppCard class="h-fit lg:col-span-1">
                 <AppCardHeader>
