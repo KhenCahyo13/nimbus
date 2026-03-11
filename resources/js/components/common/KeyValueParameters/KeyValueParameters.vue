@@ -172,7 +172,7 @@ const handleDeleteParameter = (index: number) => {
                 @click="deleteAllParameters"
             >
                 <Trash2Icon />
-                {{ deletingAll ? 'Confirm Delete All' : 'Delete All' }}
+                Delete All
             </AppButton>
         </div>
 
