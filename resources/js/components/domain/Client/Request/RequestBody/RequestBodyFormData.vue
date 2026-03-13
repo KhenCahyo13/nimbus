@@ -7,12 +7,8 @@ import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/Ke
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
 import { useEnvironmentVariablesStore } from '@/stores';
-import {
-    createEnvironmentVariablesMap,
-    EnvironmentPlaceholderStatus,
-    getEnvironmentPlaceholderStatus,
-} from '@/utils/request';
-import { computed, nextTick, ref, watch } from 'vue';
+import { getValueInputClass } from '@/utils/ui/environment-variable';
+import { nextTick, ref, watch } from 'vue';
 
 /*
  * Types & Interfaces.
@@ -30,7 +26,6 @@ export interface AppRequestBodyFormDataEmits {
 
 defineProps<AppRequestBodyFormDataProps>();
 const emit = defineEmits<AppRequestBodyFormDataEmits>();
-const environmentVariablesStore = useEnvironmentVariablesStore();
 
 const model = defineModel<FormData | null>({
     default: () => null,
@@ -104,26 +99,6 @@ const handlePayloadUpdate = (parameters: ParameterContract[]) => {
     isPropagatingChangesToParent.value = true;
     payload.value = parameters;
     emit('update:modelValue', convertParametersArrayToFormData(parameters));
-};
-
-const activeVariables = computed(
-    () => environmentVariablesStore.activeCollection?.variables ?? [],
-);
-const activeVariablesMap = computed(() =>
-    createEnvironmentVariablesMap(activeVariables.value),
-);
-const getValueInputClass = (parameter: ParameterContract) => {
-    const status = getEnvironmentPlaceholderStatus(
-        parameter.value,
-        activeVariables.value,
-        activeVariablesMap.value,
-    );
-
-    return {
-        'text-destructive': status === EnvironmentPlaceholderStatus.Missing,
-        'text-warning': status === EnvironmentPlaceholderStatus.Empty,
-        'text-primary': status === EnvironmentPlaceholderStatus.Resolved,
-    };
 };
 
 /*
