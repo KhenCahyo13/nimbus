@@ -89,6 +89,7 @@ jobs:
           commit_message: "style: apply php style fixes"
 
       - name: Fail if fixes could not be auto-applied
+        run: |
           if ! git diff --quiet || ! git diff --cached --quiet; then
             echo "Code fixers produced changes, but it was not possible to auto-commit them."
             echo "Please apply the code fixes locally and push them to the PR branch."
