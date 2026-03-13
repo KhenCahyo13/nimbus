@@ -36,7 +36,7 @@ export interface AppKeyValueParametersProps {
     modelValue?: ParameterContract[];
     freeFormTypes?: boolean;
     class?: HTMLAttributes['class'];
-    getValueInputClass?: (parameter: ParameterContract) => HTMLAttributes['class'];
+    getValueInputExtraClassUsing?: (parameter: ParameterContract) => HTMLAttributes['class'];
 }
 
 export interface AppKeyValueParametersEmits {
@@ -224,7 +224,7 @@ const handleDeleteParameter = (index: number) => {
                     <AppInput
                         v-model="parameter.value"
                         placeholder="Value"
-                        :class="cn('pl-panel h-full flex-1 rounded-none border-0 border-r shadow-none focus:ring-0 focus-visible:ring-0', props.getValueInputClass?.(parameter))"
+                        :class="cn('pl-panel h-full flex-1 rounded-none border-0 border-r shadow-none focus:ring-0 focus-visible:ring-0', props.getValueInputExtraClassUsing?.(parameter))"
                         :disabled="!parameter.enabled"
                         name="kv-value"
                         data-testid="kv-value"
