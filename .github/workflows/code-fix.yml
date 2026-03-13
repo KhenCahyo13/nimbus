@@ -89,10 +89,8 @@ jobs:
           commit_message: "style: apply php style fixes"
 
       - name: Fail if fixes could not be auto-applied
-        if: steps.filter.outputs.fixable == 'true' && !env.ACT && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
-        run: |
-          if ! git diff --quiet || ! git diff --cached --quiet; then
-            echo "Code fixers produced changes, but this pull request comes from a fork so auto-commit is not allowed."
-            echo "Please apply the generated fixes locally and push them to the PR branch."
-            exit 1
-          fi
+        if ! git diff --quiet || ! git diff --cached --quiet; then
+          echo "Code fixers produced changes, but it was not possible to auto-commit them."
+          echo "Please apply the code fixes locally and push them to the PR branch."
+          exit 1
+        fi
