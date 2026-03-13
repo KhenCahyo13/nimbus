@@ -61,8 +61,8 @@ const coreItems = [
         isActive: false,
     },
     {
-        title: 'Variables',
-        route: { name: 'variables' },
+        title: 'Environments',
+        route: { name: 'environments' },
         icon: Layers3Icon,
         isActive: false,
     },

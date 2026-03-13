@@ -13,10 +13,10 @@ const environmentVariablesStore = useEnvironmentVariablesStore();
 </script>
 
 <template>
-    <PageLayout title="Variables" :icon="Layers3Icon">
+    <PageLayout title="Environments" :icon="Layers3Icon">
         <template #subheader-left>
             <p class="text-subtle-foreground text-xs">
-                Manage environment collections for request variable substitution.
+                Manage environment collections and the related global variables for request.
             </p>
         </template>
 

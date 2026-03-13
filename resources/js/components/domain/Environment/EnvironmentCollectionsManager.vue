@@ -114,7 +114,7 @@ const getValueInputClass = (parameter: ParameterContract) => {
                 <AppCardHeader>
                     <AppCardTitle>Environment Details</AppCardTitle>
                     <AppCardDescription>
-                        Edit collection and variables. Changes are persisted
+                        Edit collection and related global variables. Changes are persisted
                         automatically.
                     </AppCardDescription>
                 </AppCardHeader>

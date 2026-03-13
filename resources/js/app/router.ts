@@ -13,9 +13,9 @@ const routes = [
         name: 'settings',
     },
     {
-        path: '/variables',
+        path: '/environments',
         component: () => import('@/pages/Environment.vue'),
-        name: 'variables',
+        name: 'environments',
     },
 
     /*
