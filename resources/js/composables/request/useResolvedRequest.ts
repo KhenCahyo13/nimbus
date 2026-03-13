@@ -31,8 +31,7 @@ export interface UseResolvedRequestResult {
 export function useResolvedRequest(): UseResolvedRequestResult {
     const environmentVariablesStore = useEnvironmentVariablesStore();
 
-    const getActiveVariables = () =>
-        environmentVariablesStore.activeCollection?.variables ?? [];
+    const getActiveVariables = () => environmentVariablesStore.variables;
 
     const getMemoizedBody = (request: PendingRequest) => {
         const body = request.body[request.method] ?? null;

@@ -56,6 +56,10 @@ export const useEnvironmentVariablesStore = defineStore(
             );
         });
 
+        const variables = computed(() => {
+            return activeCollection.value?.variables ?? [];
+        });
+
         const setActiveCollection = (collectionId: string | null) => {
             activeCollectionId.value = collectionId;
         };
@@ -140,6 +144,7 @@ export const useEnvironmentVariablesStore = defineStore(
             activeCollectionId,
             nextVariableId,
             activeCollection,
+            variables,
             setActiveCollection,
             addCollection,
             removeCollection,
