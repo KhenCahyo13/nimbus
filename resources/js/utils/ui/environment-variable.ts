@@ -13,16 +13,10 @@ export const activeVariablesMap = computed(() =>
     createEnvironmentVariablesMap(activeVariables.value),
 );
 
-export const getValueInputClass = (parameter: ParameterContract) => {
-    const status = getEnvironmentPlaceholderStatus(
+export const getValueInputStatus = (parameter: ParameterContract): EnvironmentPlaceholderStatus => {
+    return getEnvironmentPlaceholderStatus(
         parameter.value,
         activeVariables.value,
         activeVariablesMap.value,
     );
-
-    return {
-        'text-destructive': status === EnvironmentPlaceholderStatus.Missing,
-        'text-warning': status === EnvironmentPlaceholderStatus.Empty,
-        'text-primary': status === EnvironmentPlaceholderStatus.Resolved,
-    };
 };

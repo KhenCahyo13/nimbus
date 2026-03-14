@@ -9,13 +9,9 @@ import type { GeneratorType } from '@/interfaces/http';
 import { type SourceGlobalHeaders } from '@/interfaces/http';
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
-import { useConfigStore, useEnvironmentVariablesStore, useRequestStore, useValueGeneratorStore } from '@/stores';
-import {
-    createEnvironmentVariablesMap,
-    EnvironmentPlaceholderStatus,
-    getEnvironmentPlaceholderStatus,
-} from '@/utils/request';
+import { useConfigStore, useRequestStore, useValueGeneratorStore } from '@/stores';
 import { generateValueFromType } from '@/utils/value-generator/generateValueFromType';
+import { getValueInputStatus } from '@/utils/ui/environment-variable';
 import { computed, onBeforeMount, type Ref, ref } from 'vue';
 
 /*
@@ -37,7 +33,6 @@ defineProps<AppRequestHeadersProps>();
 const requestStore = useRequestStore();
 const configStore = useConfigStore();
 const valueGeneratorStore = useValueGeneratorStore();
-const environmentVariablesStore = useEnvironmentVariablesStore();
 
 /*
  * State.
@@ -75,26 +70,6 @@ const handleHeadersUpdate = (parameters: ParameterContract[]) => {
     syncHeadersWithPendingRequest(parameters);
 };
 
-const activeVariables = computed(
-    () => environmentVariablesStore.activeCollection?.variables ?? [],
-);
-const activeVariablesMap = computed(() =>
-    createEnvironmentVariablesMap(activeVariables.value),
-);
-const getValueInputClass = (parameter: ParameterContract) => {
-    const status = getEnvironmentPlaceholderStatus(
-        parameter.value,
-        activeVariables.value,
-        activeVariablesMap.value,
-    );
-
-    return {
-        'text-destructive': status === EnvironmentPlaceholderStatus.Missing,
-        'text-warning': status === EnvironmentPlaceholderStatus.Empty,
-        'text-primary': status === EnvironmentPlaceholderStatus.Resolved,
-    };
-};
-
 /*
  * Lifecycle.
  */
@@ -122,7 +97,7 @@ onBeforeMount(() => {
     <KeyValueParametersBuilder
         ref="parametersBuilder"
         :model-value="effectiveHeaders"
-        :get-value-input-class="getValueInputClass"
+        :get-value-input-status-using="getValueInputStatus"
         @update:parameters="handleHeadersUpdate"
     />
 </template>

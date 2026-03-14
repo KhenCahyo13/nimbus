@@ -144,7 +144,7 @@ describe('KeyValueParameters', () => {
 
             const wrapper = createWrapper({
                 props: {
-                    getValueInputClass: () => 'text-primary',
+                    getValueInputStatusUsing: () => 'resolved',
                 },
             });
 

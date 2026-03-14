@@ -6,8 +6,7 @@
 import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/KeyValueParameters.vue';
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
-import { useEnvironmentVariablesStore } from '@/stores';
-import { getValueInputClass } from '@/utils/ui/environment-variable';
+import { getValueInputStatus } from '@/utils/ui/environment-variable';
 import { nextTick, ref, watch } from 'vue';
 
 /*
@@ -135,7 +134,7 @@ watch(
     <KeyValueParametersBuilder
         :model-value="payload"
         :free-form-types="true"
-        :get-value-input-class="getValueInputClass"
+        :get-value-input-status-using="getValueInputStatus"
         @update:parameters="handlePayloadUpdate"
     />
 </template>
