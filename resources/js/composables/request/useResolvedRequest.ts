@@ -9,82 +9,85 @@ import { computed, type ComputedRef } from 'vue';
 
 export interface UseResolvedRequestResult {
     resolveRequest: (request: PendingRequest) => Request;
-    resolvedEndpoint: ComputedRef<(request: PendingRequest) => string>;
-    resolvedHeaders: ComputedRef<
-        (request: PendingRequest) => ReturnType<typeof resolveEnvironmentVariablesInParameters>
-    >;
-    resolvedBody: ComputedRef<
-        (request: PendingRequest) => ReturnType<typeof resolveEnvironmentVariablesInBody>
-    >;
-    resolvedQueryParameters: ComputedRef<
-        (request: PendingRequest) => ReturnType<typeof resolveEnvironmentVariablesInParameters>
-    >;
+    resolvedEndpoint: ComputedRef<string>;
+    resolvedHeaders: ComputedRef<ReturnType<typeof resolveEnvironmentVariablesInParameters>>;
+    resolvedBody: ComputedRef<ReturnType<typeof resolveEnvironmentVariablesInBody>>;
+    resolvedQueryParameters: ComputedRef<ReturnType<typeof resolveEnvironmentVariablesInParameters>>;
 }
 
 /**
  * Resolves environment placeholders from a pending request and exposes
- * primitive request values for execution and preview.
+ * reactive granular computed properties for individual request components.
  *
- * Provides granular reactive computed properties for individual request
- * components, allowing decoupled consumption and automatic reactivity.
+ * Pass a reactive `request` ref to enable per-field computed values that
+ * automatically update when either the request or active environment
+ * variables change — allowing decoupled, granular consumption.
+ *
+ * `resolveRequest` is also available for imperative resolution (e.g. in stores).
  */
-export function useResolvedRequest(): UseResolvedRequestResult {
+export function useResolvedRequest(
+    request?: ComputedRef<PendingRequest | null>,
+): UseResolvedRequestResult {
     const environmentVariablesStore = useEnvironmentVariablesStore();
 
-    const getActiveVariables = () => environmentVariablesStore.variables;
+    const getMemoizedBody = (req: PendingRequest) => {
+        const body = req.body[req.method] ?? null;
 
-    const getMemoizedBody = (request: PendingRequest) => {
-        const body = request.body[request.method] ?? null;
-
-        return body ? (body[request.payloadType] ?? null) : null;
+        return body ? (body[req.payloadType] ?? null) : null;
     };
 
     const resolvedEndpoint = computed(() => {
-        return (request: PendingRequest) => {
-            return resolveEnvironmentVariables(request.endpoint, getActiveVariables());
-        };
+        if (!request?.value) return '';
+
+        return resolveEnvironmentVariables(
+            request.value.endpoint,
+            environmentVariablesStore.variables,
+        );
     });
 
     const resolvedHeaders = computed(() => {
-        return (request: PendingRequest) => {
-            return resolveEnvironmentVariablesInParameters(
-                request.headers,
-                getActiveVariables(),
-            );
-        };
+        if (!request?.value) return [];
+
+        return resolveEnvironmentVariablesInParameters(
+            request.value.headers,
+            environmentVariablesStore.variables,
+        );
     });
 
     const resolvedBody = computed(() => {
-        return (request: PendingRequest) => {
-            return resolveEnvironmentVariablesInBody(
-                getMemoizedBody(request),
-                getActiveVariables(),
-            );
-        };
+        if (!request?.value) return null;
+
+        return resolveEnvironmentVariablesInBody(
+            getMemoizedBody(request.value),
+            environmentVariablesStore.variables,
+        );
     });
 
     const resolvedQueryParameters = computed(() => {
-        return (request: PendingRequest) => {
-            return resolveEnvironmentVariablesInParameters(
-                request.queryParameters,
-                getActiveVariables(),
-            );
-        };
+        if (!request?.value) return [];
+
+        return resolveEnvironmentVariablesInParameters(
+            request.value.queryParameters,
+            environmentVariablesStore.variables,
+        );
     });
 
-    const resolveRequest = (request: PendingRequest): Request => {
-        const activeVariables = getActiveVariables();
+    const resolveRequest = (req: PendingRequest): Request => {
+        const activeVariables = environmentVariablesStore.variables;
 
         return {
-            method: request.method,
-            endpoint: resolvedEndpoint.value(request),
-            headers: resolvedHeaders.value(request),
-            body: resolvedBody.value(request),
-            queryParameters: resolvedQueryParameters.value(request),
-            payloadType: request.payloadType,
-            authorization: request.authorization,
-            routeDefinition: request.routeDefinition,
-            transactionMode: request.transactionMode,
+            method: req.method,
+            endpoint: resolveEnvironmentVariables(req.endpoint, activeVariables),
+            headers: resolveEnvironmentVariablesInParameters(req.headers, activeVariables),
+            body: resolveEnvironmentVariablesInBody(getMemoizedBody(req), activeVariables),
+            queryParameters: resolveEnvironmentVariablesInParameters(
+                req.queryParameters,
+                activeVariables,
+            ),
+            payloadType: req.payloadType,
+            authorization: req.authorization,
+            routeDefinition: req.routeDefinition,
+            transactionMode: req.transactionMode,
         };
     };
 

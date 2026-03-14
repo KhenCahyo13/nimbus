@@ -3,10 +3,8 @@ import { createEnvironmentVariablesMap, EnvironmentPlaceholderStatus, getEnviron
 import { ParameterContract } from "@/interfaces";
 import { useEnvironmentVariablesStore } from "@/stores";
 
-const environmentVariablesStore = useEnvironmentVariablesStore();
-
 export const activeVariables = computed(
-    () => environmentVariablesStore.activeCollection?.variables ?? [],
+    () => useEnvironmentVariablesStore().activeCollection?.variables ?? [],
 );
 
 export const activeVariablesMap = computed(() =>
