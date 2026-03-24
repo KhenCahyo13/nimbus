@@ -9,11 +9,12 @@ permissions:
   contents: write
 
 jobs:
-  style-fix:
+  setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    name: Apply Code Fixes
-
+    name: Setup Environment
+    outputs:
+      is_internal: ${{ steps.compute_is_internal.outputs.is_internal }}
+      fixable: ${{ steps.filter.outputs.fixable }}
     steps:
       - name: Checkout code
         if: ${{ !env.ACT }}
@@ -22,6 +23,9 @@ jobs:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
           token: ${{ secrets.CI_TOKEN || github.token }}
+
+      - id: compute_is_internal
+        run: echo "is_internal=${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}" >> "$GITHUB_OUTPUT"
 
       - name: Check for changes
         id: filter
@@ -36,54 +40,63 @@ jobs:
               - 'package.json'
               - 'composer.json'
 
+  style-fix-internal:
+    needs: setup
+    if: needs.setup.outputs.is_internal == 'true' && needs.setup.outputs.fixable == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    name: Apply Code Fixes (Internal)
+
+    steps:
+      - name: Checkout code
+        if: ${{ !env.ACT }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref_name }}
+          token: ${{ secrets.CI_TOKEN || github.token }}
+
       - name: Setup Node.js
-        if: steps.filter.outputs.fixable == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'npm'
 
       - name: Install npm dependencies
-        if: steps.filter.outputs.fixable == 'true'
         run: npm ci
 
       - name: Fix js styles if Eslint passes
-        if: steps.filter.outputs.fixable == 'true'
         run: npm run style:fix
 
-      - name: Commit changes
-        if: steps.filter.outputs.fixable == 'true' && !env.ACT && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+      - name: Commit JS changes
+        if: ${{ !env.ACT }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: apply TS style fixes"
 
       - name: Setup PHP
-        if: steps.filter.outputs.fixable == 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           coverage: none
 
       - name: Install composer dependencies
-        if: steps.filter.outputs.fixable == 'true'
         uses: ramsey/composer-install@v3
 
       - name: Rector
-        if: steps.filter.outputs.fixable == 'true'
         run: composer rector
 
-      - name: Commit changes
-        if: steps.filter.outputs.fixable == 'true' && !env.ACT && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+      - name: Commit Rector changes
+        if: ${{ !env.ACT }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "refactor: apply rector"
 
       - name: Fix php styles
-        if: steps.filter.outputs.fixable == 'true'
         run: composer style:fix
 
-      - name: Commit changes
-        if: steps.filter.outputs.fixable == 'true' && !env.ACT && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+      - name: Commit php changes
+        if: ${{ !env.ACT }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: apply php style fixes"
@@ -95,3 +108,41 @@ jobs:
             echo "Please apply the code fixes locally and push them to the PR branch."
             exit 1
           fi
+
+  style-check-fork:
+    needs: setup
+    if: needs.setup.outputs.is_internal == 'false' && needs.setup.outputs.fixable == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    name: Check Code Styles (Fork)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Check js styles
+        run: npm run style:check
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Install composer dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: Check Rector
+        run: composer rector -- --dry-run
+
+      - name: Check php styles
+        run: vendor/bin/pint --test
