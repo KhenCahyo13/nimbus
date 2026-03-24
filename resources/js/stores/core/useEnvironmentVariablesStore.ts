@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
 import { type ParameterContract, ParameterType } from '@/interfaces/ui';
-import { computed, ref } from 'vue';
+import { defineStore } from 'pinia';
+import { computed, onMounted, ref } from 'vue';
 
 export type EnvironmentVariable = ParameterContract;
 
@@ -32,7 +32,8 @@ export const useEnvironmentVariablesStore = defineStore(
     () => {
         const collections = ref<EnvironmentCollection[]>([]);
         const activeCollectionId = ref<string | null>(null);
-        const nextVariableId = ref(0);
+        const nextVariableId = ref(0); // todo use usevue counter here
+        const isPickingCollectionName = ref<boolean>(false);
 
         const generateVariableId = () => {
             nextVariableId.value += 1;
@@ -70,6 +71,8 @@ export const useEnvironmentVariablesStore = defineStore(
 
             collections.value.push(collection);
             activeCollectionId.value = collection.id;
+
+            isPickingCollectionName.value = true;
         };
 
         const removeCollection = (collectionId: string) => {
@@ -127,11 +130,11 @@ export const useEnvironmentVariablesStore = defineStore(
             }
 
             updateCollectionName(activeCollection.value.id, name);
+
+            sealNewCollectionName();
         };
 
-        const updateActiveCollectionVariables = (
-            variables: EnvironmentVariable[],
-        ) => {
+        const updateActiveCollectionVariables = (variables: EnvironmentVariable[]) => {
             if (!activeCollection.value) {
                 return;
             }
@@ -139,13 +142,21 @@ export const useEnvironmentVariablesStore = defineStore(
             updateCollectionVariables(activeCollection.value.id, variables);
         };
 
+        const sealNewCollectionName = () => {
+            isPickingCollectionName.value = false;
+        };
+
+        onMounted(() => (isPickingCollectionName.value = false));
+
         return {
             collections,
             activeCollectionId,
             nextVariableId,
             activeCollection,
             variables,
+            isPickingCollectionName,
             setActiveCollection,
+            sealNewCollectionName,
             addCollection,
             removeCollection,
             updateCollectionName,
