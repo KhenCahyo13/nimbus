@@ -10,9 +10,13 @@ import { computed, type ComputedRef } from 'vue';
 export interface UseResolvedRequestResult {
     resolveRequest: (request: PendingRequest) => Request;
     resolvedEndpoint: ComputedRef<string>;
-    resolvedHeaders: ComputedRef<ReturnType<typeof resolveEnvironmentVariablesInParameters>>;
+    resolvedHeaders: ComputedRef<
+        ReturnType<typeof resolveEnvironmentVariablesInParameters>
+    >;
     resolvedBody: ComputedRef<ReturnType<typeof resolveEnvironmentVariablesInBody>>;
-    resolvedQueryParameters: ComputedRef<ReturnType<typeof resolveEnvironmentVariablesInParameters>>;
+    resolvedQueryParameters: ComputedRef<
+        ReturnType<typeof resolveEnvironmentVariablesInParameters>
+    >;
 }
 
 /**
@@ -37,7 +41,9 @@ export function useResolvedRequest(
     };
 
     const resolvedEndpoint = computed(() => {
-        if (!request?.value) return '';
+        if (!request?.value) {
+            return '';
+        }
 
         return resolveEnvironmentVariables(
             request.value.endpoint,
@@ -46,7 +52,9 @@ export function useResolvedRequest(
     });
 
     const resolvedHeaders = computed(() => {
-        if (!request?.value) return [];
+        if (!request?.value) {
+            return [];
+        }
 
         return resolveEnvironmentVariablesInParameters(
             request.value.headers,
@@ -55,7 +63,9 @@ export function useResolvedRequest(
     });
 
     const resolvedBody = computed(() => {
-        if (!request?.value) return null;
+        if (!request?.value) {
+            return null;
+        }
 
         return resolveEnvironmentVariablesInBody(
             getMemoizedBody(request.value),
@@ -64,7 +74,9 @@ export function useResolvedRequest(
     });
 
     const resolvedQueryParameters = computed(() => {
-        if (!request?.value) return [];
+        if (!request?.value) {
+            return [];
+        }
 
         return resolveEnvironmentVariablesInParameters(
             request.value.queryParameters,
@@ -78,8 +90,14 @@ export function useResolvedRequest(
         return {
             method: req.method,
             endpoint: resolveEnvironmentVariables(req.endpoint, activeVariables),
-            headers: resolveEnvironmentVariablesInParameters(req.headers, activeVariables),
-            body: resolveEnvironmentVariablesInBody(getMemoizedBody(req), activeVariables),
+            headers: resolveEnvironmentVariablesInParameters(
+                req.headers,
+                activeVariables,
+            ),
+            body: resolveEnvironmentVariablesInBody(
+                getMemoizedBody(req),
+                activeVariables,
+            ),
             queryParameters: resolveEnvironmentVariablesInParameters(
                 req.queryParameters,
                 activeVariables,

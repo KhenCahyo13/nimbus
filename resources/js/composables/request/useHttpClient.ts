@@ -2,8 +2,8 @@ import { httpClientConfig } from '@/config';
 import type { ParameterContract, RequestHeader } from '@/interfaces';
 import type {
     HttpHeaders,
-    Request,
     RelayProxyResponse,
+    Request,
     Response,
 } from '@/interfaces/http';
 import { useConfigStore } from '@/stores';
@@ -202,9 +202,7 @@ export function useHttpClient(): UseHttpClientResult {
         abortController.value.abort();
     };
 
-    const executeRequest = async (
-        request: Request,
-    ): Promise<RequestResult | null> => {
+    const executeRequest = async (request: Request): Promise<RequestResult | null> => {
         // Prevent concurrent requests to avoid race conditions
         if (isExecuting.value) {
             throw new Error('Request already in progress');

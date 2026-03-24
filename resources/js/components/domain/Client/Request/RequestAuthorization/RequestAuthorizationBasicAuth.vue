@@ -49,11 +49,19 @@ const username = ref(model.value.username);
 const password = ref(model.value.password);
 
 const usernamePlaceholderStatus = computed(() =>
-    getEnvironmentPlaceholderStatus(username.value, activeVariables.value, activeVariablesMap.value),
+    getEnvironmentPlaceholderStatus(
+        username.value,
+        activeVariables.value,
+        activeVariablesMap.value,
+    ),
 );
 
 const passwordPlaceholderStatus = computed(() =>
-    getEnvironmentPlaceholderStatus(password.value, activeVariables.value, activeVariablesMap.value),
+    getEnvironmentPlaceholderStatus(
+        password.value,
+        activeVariables.value,
+        activeVariablesMap.value,
+    ),
 );
 
 /*
@@ -80,8 +88,8 @@ watch(password, newValue => {
             Username
         </label>
         <EnvironmentVariablePlaceholderIndicator
-            :status="usernamePlaceholderStatus"
             v-slot="{ onMouseenter, onMouseleave }"
+            :status="usernamePlaceholderStatus"
         >
             <AppInput
                 id="username"
@@ -90,11 +98,13 @@ watch(password, newValue => {
                 class="col-span-2 h-full rounded-none border-0 text-xs shadow-none focus:ring-0 focus-visible:ring-0"
                 :class="{
                     'text-destructive':
-                        usernamePlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
+                        usernamePlaceholderStatus ===
+                        EnvironmentPlaceholderStatus.Missing,
                     'text-warning':
                         usernamePlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
                     'text-primary':
-                        usernamePlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
+                        usernamePlaceholderStatus ===
+                        EnvironmentPlaceholderStatus.Resolved,
                 }"
                 @mouseenter="onMouseenter"
                 @mouseleave="onMouseleave"
@@ -109,8 +119,8 @@ watch(password, newValue => {
             Password
         </label>
         <EnvironmentVariablePlaceholderIndicator
-            :status="passwordPlaceholderStatus"
             v-slot="{ onMouseenter, onMouseleave }"
+            :status="passwordPlaceholderStatus"
         >
             <AppInput
                 id="password"
@@ -119,11 +129,13 @@ watch(password, newValue => {
                 class="col-span-2 h-full rounded-none border-0 text-xs shadow-none focus:ring-0 focus-visible:ring-0"
                 :class="{
                     'text-destructive':
-                        passwordPlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
+                        passwordPlaceholderStatus ===
+                        EnvironmentPlaceholderStatus.Missing,
                     'text-warning':
                         passwordPlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
                     'text-primary':
-                        passwordPlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
+                        passwordPlaceholderStatus ===
+                        EnvironmentPlaceholderStatus.Resolved,
                 }"
                 @mouseenter="onMouseenter"
                 @mouseleave="onMouseleave"

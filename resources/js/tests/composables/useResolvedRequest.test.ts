@@ -26,7 +26,9 @@ vi.mock('@/stores', async importOriginal => {
 
 const makeVariable = (key: string, value: string) => ({ key, value, enabled: true });
 
-const createPendingRequest = (overrides: Partial<PendingRequest> = {}): PendingRequest => ({
+const createPendingRequest = (
+    overrides: Partial<PendingRequest> = {},
+): PendingRequest => ({
     method: 'GET',
     endpoint: 'api/users',
     headers: [],
@@ -73,9 +75,13 @@ describe('useResolvedRequest', () => {
         it('resolves endpoint placeholders reactively', () => {
             // Arrange
 
-            mockEnvironmentVariablesStore.variables = [makeVariable('base_url', 'example.com')];
+            mockEnvironmentVariablesStore.variables = [
+                makeVariable('base_url', 'example.com'),
+            ];
             const request = ref(createPendingRequest({ endpoint: '{{base_url}}/users' }));
-            const { resolvedEndpoint } = useResolvedRequest(computed(() => request.value));
+            const { resolvedEndpoint } = useResolvedRequest(
+                computed(() => request.value),
+            );
 
             // Assert
 
@@ -87,7 +93,9 @@ describe('useResolvedRequest', () => {
 
             mockEnvironmentVariablesStore.variables = [makeVariable('env', 'staging')];
             const request = ref(createPendingRequest({ endpoint: '{{env}}/users' }));
-            const { resolvedEndpoint } = useResolvedRequest(computed(() => request.value));
+            const { resolvedEndpoint } = useResolvedRequest(
+                computed(() => request.value),
+            );
 
             expect(resolvedEndpoint.value).toBe('staging/users');
 
@@ -104,7 +112,9 @@ describe('useResolvedRequest', () => {
             // Arrange
 
             const request = ref(createPendingRequest({ endpoint: 'api/users' }));
-            const { resolvedEndpoint } = useResolvedRequest(computed(() => request.value));
+            const { resolvedEndpoint } = useResolvedRequest(
+                computed(() => request.value),
+            );
 
             expect(resolvedEndpoint.value).toBe('api/users');
 
@@ -156,7 +166,9 @@ describe('useResolvedRequest', () => {
         it('resolves environment variable placeholders in the endpoint', () => {
             // Arrange
 
-            mockEnvironmentVariablesStore.variables = [makeVariable('host', 'example.com')];
+            mockEnvironmentVariablesStore.variables = [
+                makeVariable('host', 'example.com'),
+            ];
             const { resolveRequest } = useResolvedRequest();
             const request = createPendingRequest({ endpoint: '{{host}}/users' });
 

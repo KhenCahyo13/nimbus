@@ -2,9 +2,7 @@ import { useHttpClient } from '@/composables/request/useHttpClient';
 import { AuthorizationType } from '@/interfaces/generated';
 import { RequestBodyTypeEnum, type Request } from '@/interfaces/http';
 import { ParameterType } from '@/interfaces/ui';
-import {
-    createMockRelayProxyResponse,
-} from '@/tests/_utils/test-factories';
+import { createMockRelayProxyResponse } from '@/tests/_utils/test-factories';
 import axios, { AxiosError } from 'axios';
 import type { Mocked } from 'vitest';
 import { describe, expect, it, vi } from 'vitest';

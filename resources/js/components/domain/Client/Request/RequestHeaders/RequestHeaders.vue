@@ -10,8 +10,8 @@ import { type SourceGlobalHeaders } from '@/interfaces/http';
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
 import { useConfigStore, useRequestStore, useValueGeneratorStore } from '@/stores';
-import { generateValueFromType } from '@/utils/value-generator/generateValueFromType';
 import { getValueInputStatus } from '@/utils/ui/environment-variable';
+import { generateValueFromType } from '@/utils/value-generator/generateValueFromType';
 import { computed, onBeforeMount, type Ref, ref } from 'vue';
 
 /*

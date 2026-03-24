@@ -6,8 +6,8 @@ import {
     getEnvironmentPlaceholderStatus,
 } from '@/utils/request';
 import { json } from '@codemirror/lang-json';
-import { type Diagnostic, lintGutter, linter } from '@codemirror/lint';
-import { type Extension, EditorState } from '@codemirror/state';
+import { type Diagnostic, linter, lintGutter } from '@codemirror/lint';
+import { EditorState, type Extension } from '@codemirror/state';
 import { jsonSchema } from 'codemirror-json-schema';
 import type { JSONSchema7 } from 'json-schema';
 

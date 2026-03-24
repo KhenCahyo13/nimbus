@@ -4,13 +4,13 @@
 
 export { generateCurlCommand } from './curl-generator';
 export {
-    createEnvironmentVariablesMap,
     EnvironmentPlaceholderStatus,
-    type EnvironmentSubstitutionVariable,
+    createEnvironmentVariablesMap,
     getEnvironmentPlaceholderStatus,
     resolveEnvironmentVariables,
     resolveEnvironmentVariablesInBody,
     resolveEnvironmentVariablesInParameters,
+    type EnvironmentSubstitutionVariable,
 } from './environment-variable-resolver';
 export { buildRequestUrl } from './request-url-builder';
 export {

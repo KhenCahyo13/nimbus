@@ -1,5 +1,5 @@
-import type { AuthorizationContract } from '@/interfaces/auth/authorization';
 import { useResolvedRequest } from '@/composables/request/useResolvedRequest';
+import type { AuthorizationContract } from '@/interfaces/auth/authorization';
 import { AuthorizationType } from '@/interfaces/generated';
 import type { RequestLog } from '@/interfaces/history/logs';
 import type {

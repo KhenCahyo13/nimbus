@@ -1,5 +1,5 @@
-import { useResolvedRequest } from '@/composables/request/useResolvedRequest';
 import { useHttpClient } from '@/composables/request/useHttpClient';
+import { useResolvedRequest } from '@/composables/request/useResolvedRequest';
 import type { ErrorPlainResponse, PendingRequest } from '@/interfaces/http';
 import { useRequestsHistoryStore, useTabsStore } from '@/stores';
 import {

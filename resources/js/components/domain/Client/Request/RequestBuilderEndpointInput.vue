@@ -48,7 +48,11 @@ const endpoint = computed({
 
 const { placeholders, hasPlaceholders } = useRoutePlaceholderDetection(endpoint);
 const endpointPlaceholderStatus = computed(() =>
-    getEnvironmentPlaceholderStatus(endpoint.value, activeVariables.value, activeVariablesMap.value),
+    getEnvironmentPlaceholderStatus(
+        endpoint.value,
+        activeVariables.value,
+        activeVariablesMap.value,
+    ),
 );
 
 const { handleClick: autoSelectRouteVariableSegmentWhenApplicable } =
@@ -83,17 +87,22 @@ const executeCurrentRequestWhenEnterIsPressed = (event: KeyboardEvent) => {
 <template>
     <div class="flex flex-1 items-center">
         <EnvironmentVariablePlaceholderIndicator
-            :status="endpointPlaceholderStatus"
             v-slot="{ onMouseenter, onMouseleave }"
+            :status="endpointPlaceholderStatus"
         >
             <AppInput
                 v-model="endpoint"
                 variant="toolbar"
                 class="h-full flex-1 text-xs"
                 :class="{
-                    'text-destructive': endpointPlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
-                    'text-warning': endpointPlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
-                    'text-primary': endpointPlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
+                    'text-destructive':
+                        endpointPlaceholderStatus ===
+                        EnvironmentPlaceholderStatus.Missing,
+                    'text-warning':
+                        endpointPlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
+                    'text-primary':
+                        endpointPlaceholderStatus ===
+                        EnvironmentPlaceholderStatus.Resolved,
                 }"
                 placeholder="<endpoint>"
                 data-testid="endpoint-input"

@@ -29,7 +29,11 @@ const model: ModelRef<string> = defineModel<string>({
 });
 
 const modelPlaceholderStatus = computed(() =>
-    getEnvironmentPlaceholderStatus(model.value, activeVariables.value, activeVariablesMap.value),
+    getEnvironmentPlaceholderStatus(
+        model.value,
+        activeVariables.value,
+        activeVariablesMap.value,
+    ),
 );
 </script>
 
@@ -39,8 +43,8 @@ const modelPlaceholderStatus = computed(() =>
             Bearer Token
         </label>
         <EnvironmentVariablePlaceholderIndicator
-            :status="modelPlaceholderStatus"
             v-slot="{ onMouseenter, onMouseleave }"
+            :status="modelPlaceholderStatus"
         >
             <AppInput
                 id="bearer"
@@ -48,9 +52,12 @@ const modelPlaceholderStatus = computed(() =>
                 placeholder="Token"
                 class="col-span-2 h-full rounded-none border-0 text-xs shadow-none focus:ring-0 focus-visible:ring-0"
                 :class="{
-                    'text-destructive': modelPlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
-                    'text-warning': modelPlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
-                    'text-primary': modelPlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
+                    'text-destructive':
+                        modelPlaceholderStatus === EnvironmentPlaceholderStatus.Missing,
+                    'text-warning':
+                        modelPlaceholderStatus === EnvironmentPlaceholderStatus.Empty,
+                    'text-primary':
+                        modelPlaceholderStatus === EnvironmentPlaceholderStatus.Resolved,
                 }"
                 @mouseenter="onMouseenter"
                 @mouseleave="onMouseleave"

@@ -38,7 +38,9 @@ export interface AppKeyValueParametersProps {
     modelValue?: ParameterContract[];
     freeFormTypes?: boolean;
     class?: HTMLAttributes['class'];
-    getValueInputStatusUsing?: (parameter: ParameterContract) => EnvironmentPlaceholderStatus;
+    getValueInputStatusUsing?: (
+        parameter: ParameterContract,
+    ) => EnvironmentPlaceholderStatus;
 }
 
 export interface AppKeyValueParametersEmits {
@@ -132,7 +134,8 @@ const handleDeleteParameter = (index: number) => {
 };
 
 const getValueInputClass = (parameter: ParameterContract) => {
-    const status = props.getValueInputStatusUsing?.(parameter) ?? EnvironmentPlaceholderStatus.None;
+    const status =
+        props.getValueInputStatusUsing?.(parameter) ?? EnvironmentPlaceholderStatus.None;
 
     return {
         'text-destructive': status === EnvironmentPlaceholderStatus.Missing,
@@ -234,13 +237,21 @@ const getValueInputClass = (parameter: ParameterContract) => {
 
                     <!-- Value Input -->
                     <EnvironmentVariablePlaceholderIndicator
-                        :status="props.getValueInputStatusUsing?.(parameter) ?? EnvironmentPlaceholderStatus.None"
                         v-slot="{ onMouseenter, onMouseleave }"
+                        :status="
+                            props.getValueInputStatusUsing?.(parameter) ??
+                            EnvironmentPlaceholderStatus.None
+                        "
                     >
                         <AppInput
                             v-model="parameter.value"
                             placeholder="Value"
-                            :class="cn('pl-panel h-full flex-1 rounded-none border-0 border-r shadow-none focus:ring-0 focus-visible:ring-0', getValueInputClass(parameter))"
+                            :class="
+                                cn(
+                                    'pl-panel h-full flex-1 rounded-none border-0 border-r shadow-none focus:ring-0 focus-visible:ring-0',
+                                    getValueInputClass(parameter),
+                                )
+                            "
                             :disabled="!parameter.enabled"
                             name="kv-value"
                             data-testid="kv-value"
