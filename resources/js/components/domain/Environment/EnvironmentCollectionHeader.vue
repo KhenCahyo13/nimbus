@@ -160,7 +160,7 @@ watch(
                     class="group relative size-7 overflow-hidden shadow-none [&_svg]:size-3.5"
                     variant="outline"
                     :class="{
-                        'text-rose-500 hover:text-rose-500': isConfirmingRemoval(),
+                        'text-destructive hover:text-destructive': isConfirmingRemoval(),
                     }"
                     :disabled="!environmentVariablesStore.activeCollection"
                 >
