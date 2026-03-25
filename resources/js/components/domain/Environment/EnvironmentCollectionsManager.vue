@@ -11,7 +11,14 @@ import type { EnvironmentVariable } from '@/stores/core/useEnvironmentVariablesS
 import { templateRef } from '@vueuse/core';
 import { LucideFolderPen, PlusIcon, Trash2Icon } from 'lucide-vue-next';
 import { EditableInput, EditablePreview, EditableRoot } from 'reka-ui';
-import { type ComponentPublicInstance, computed, nextTick, onMounted, ref, watch } from 'vue';
+import {
+    type ComponentPublicInstance,
+    computed,
+    nextTick,
+    onMounted,
+    ref,
+    watch,
+} from 'vue';
 
 const environmentVariablesStore = useEnvironmentVariablesStore();
 
@@ -32,7 +39,9 @@ const activeCollectionVariables = computed(() => activeCollection.value?.variabl
 const isEditingCollectionName = ref(false);
 const editingCollectionName = ref('');
 
-const collectionNamePreviewInput = templateRef<ComponentPublicInstance>('collection-name-preview');
+const collectionNamePreviewInput = templateRef<ComponentPublicInstance>(
+    'collection-name-preview',
+);
 
 const {
     isConfirming: isConfirmingRemoval,

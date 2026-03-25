@@ -1,4 +1,4 @@
-import { type ComputedRef, onUnmounted, reactive } from 'vue';
+import { onUnmounted, reactive } from 'vue';
 
 export interface UseConfirmationActionOptions {
     duration?: number;
