@@ -41,6 +41,9 @@ export interface AppKeyValueParametersProps {
     getValueInputStatusUsing?: (
         parameter: ParameterContract,
     ) => EnvironmentPlaceholderStatus;
+    getValueInputPlaceholdersUsing?: (
+        parameter: ParameterContract,
+    ) => { key: string; value: string }[];
 }
 
 export interface AppKeyValueParametersEmits {
@@ -56,6 +59,7 @@ const props = withDefaults(defineProps<AppKeyValueParametersProps>(), {
     freeFormTypes: false,
     class: undefined,
     getValueInputStatusUsing: undefined,
+    getValueInputPlaceholdersUsing: undefined,
 });
 
 const emit = defineEmits<AppKeyValueParametersEmits>();
@@ -242,6 +246,7 @@ const getValueInputClass = (parameter: ParameterContract) => {
                             props.getValueInputStatusUsing?.(parameter) ??
                             EnvironmentPlaceholderStatus.None
                         "
+                        :placeholders="props.getValueInputPlaceholdersUsing?.(parameter)"
                     >
                         <AppInput
                             v-model="parameter.value"
@@ -256,8 +261,8 @@ const getValueInputClass = (parameter: ParameterContract) => {
                             name="kv-value"
                             data-testid="kv-value"
                             autocomplete="off"
-                            @mouseenter="onMouseenter"
-                            @mouseleave="onMouseleave"
+                            @mouseenter="() => parameter.enabled && onMouseenter()"
+                            @mouseleave="() => parameter.enabled && onMouseleave()"
                             @focus="handleValueInputFocus(index, $event.target)"
                             @blur="handleValueInputBlur"
                         />
