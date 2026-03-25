@@ -104,4 +104,60 @@ describe('RequestBuilderEndpointInput', () => {
 
         expect(mockRequestStore.executeCurrentRequest).not.toHaveBeenCalled();
     });
+
+    it('syncs the mirror scroll position when the input is scrolled', async () => {
+        const wrapper = createWrapper();
+        const input = wrapper.find('[data-testid="endpoint-input"]');
+        
+        // We need to set up the mirrorRef for the test
+        const mirror = wrapper.find({ ref: 'mirrorRef' });
+        
+        // Mock scrollLeft behavior since it's not fully operational in JSDOM
+        Object.defineProperty(mirror.element, 'scrollLeft', {
+            value: 0,
+            writable: true,
+        });
+
+        const inputElement = input.element as HTMLInputElement;
+        Object.defineProperty(inputElement, 'scrollLeft', {
+            value: 100,
+            writable: true,
+        });
+
+        await input.trigger('scroll');
+
+        expect(mirror.element.scrollLeft).toBe(100);
+    });
+
+    it('detects the hovered segment via elementFromPoint', async () => {
+        const wrapper = createWrapper();
+        const input = wrapper.find('[data-testid="endpoint-input"]');
+        
+        // Mock elementFromPoint
+        const mockSpan = document.createElement('span');
+        mockSpan.setAttribute('data-segment-index', '2');
+        
+        // Add closest mock for JSDOM
+        mockSpan.closest = vi.fn().mockReturnValue(mockSpan);
+        
+        vi.spyOn(document, 'elementFromPoint').mockReturnValue(mockSpan);
+
+        await input.trigger('mousemove', {
+            clientX: 10,
+            clientY: 10,
+        });
+
+        expect((wrapper.vm as any).activeIndicatorIndex).toBe(2);
+    });
+
+    it('clears the active indicator on mouseleave', async () => {
+        const wrapper = createWrapper();
+        const input = wrapper.find('[data-testid="endpoint-input"]');
+        
+        (wrapper.vm as any).activeIndicatorIndex = 1;
+
+        await input.trigger('mouseleave');
+
+        expect((wrapper.vm as any).activeIndicatorIndex).toBe(null);
+    });
 });

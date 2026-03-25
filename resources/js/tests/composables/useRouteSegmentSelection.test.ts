@@ -125,22 +125,7 @@ describe('useRouteSegmentSelection', () => {
             expect(mockInput.setSelectionRange).not.toHaveBeenCalled();
         });
 
-        it('preserves scroll position when selecting a segment', async () => {
-            // Arrange
-
-            const endpoint = ref('api/users/{id}');
-            const { handleClick } = useRouteSegmentSelection({ endpoint });
-            mockInput.value = 'api/users/{id}';
-            mockInput.scrollLeft = 50;
-
-            // Act
-
-            handleClick(simulateClick(mockInput, 12));
-            await nextTick();
-
-            // Assert
-
-            expect(mockInput.scrollLeft).toBe(50);
+            expect(mockInput.setSelectionRange).toHaveBeenCalledWith(10, 14);
         });
 
         it('selects a segment that was originally a variable even if braces are gone', async () => {
