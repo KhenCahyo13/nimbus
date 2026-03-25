@@ -1,6 +1,11 @@
 import { type ParameterContract, ParameterType } from '@/interfaces/ui';
 import { defineStore } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import {computed, onMounted, ref} from 'vue';
+import {useId} from "reka-ui";
+
+/*
+ * Types & Interfaces.
+ */
 
 export type EnvironmentVariable = ParameterContract;
 
@@ -10,30 +15,36 @@ export type EnvironmentCollection = {
     variables: EnvironmentVariable[];
 };
 
-function createId(prefix: string) {
-    const randomPart =
-        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-    return `${prefix}-${randomPart}`;
-}
+/*
+ * Helpers.
+ */
 
 function createDefaultCollection(index: number): EnvironmentCollection {
     return {
-        id: createId('env-col'),
+        id: useId(),
         name: `Collection ${index}`,
         variables: [],
     };
 }
 
+/*
+ * Store Definition.
+ */
+
 export const useEnvironmentVariablesStore = defineStore(
     'environment-variables',
     () => {
+        /*
+         * State.
+         */
         const collections = ref<EnvironmentCollection[]>([]);
         const activeCollectionId = ref<string | null>(null);
-        const nextVariableId = ref(0); // todo use usevue counter here
-        const isPickingCollectionName = ref<boolean>(false);
+        const nextVariableId = ref(0);
+        const isRenamingActiveCollection = ref<boolean>(false);
+
+        /*
+         * Private Methods.
+         */
 
         const generateVariableId = () => {
             nextVariableId.value += 1;
@@ -49,6 +60,10 @@ export const useEnvironmentVariablesStore = defineStore(
             enabled: true,
         });
 
+        /*
+         * Getters (Computed).
+         */
+
         const activeCollection = computed(() => {
             return (
                 collections.value.find(
@@ -61,7 +76,13 @@ export const useEnvironmentVariablesStore = defineStore(
             return activeCollection.value?.variables ?? [];
         });
 
-        const setActiveCollection = (collectionId: string | null) => {
+        const hasCollections = computed(() => collections.value.length > 0);
+
+        /*
+         * Actions.
+         */
+
+        const select = (collectionId: string | null) => {
             activeCollectionId.value = collectionId;
         };
 
@@ -72,7 +93,7 @@ export const useEnvironmentVariablesStore = defineStore(
             collections.value.push(collection);
             activeCollectionId.value = collection.id;
 
-            isPickingCollectionName.value = true;
+            isRenamingActiveCollection.value = true;
         };
 
         const removeCollection = (collectionId: string) => {
@@ -91,9 +112,13 @@ export const useEnvironmentVariablesStore = defineStore(
             }
         };
 
-        const updateCollectionName = (collectionId: string, name: string) => {
+        const renameActive = (name: string) => {
+            if (!activeCollection.value) {
+                return;
+            }
+
             collections.value = collections.value.map(collection => {
-                if (collection.id !== collectionId) {
+                if (collection.id !== activeCollection.value!.id) {
                     return collection;
                 }
 
@@ -102,18 +127,21 @@ export const useEnvironmentVariablesStore = defineStore(
                     name,
                 };
             });
+
+            completeRenaming();
         };
 
-        const updateCollectionVariables = (
-            collectionId: string,
-            variables: EnvironmentVariable[],
-        ) => {
+        const updateVariables = (variables: EnvironmentVariable[]) => {
+            if (!activeCollection.value) {
+                return;
+            }
+
             const normalizedVariables = variables.length
                 ? variables
                 : [createEmptyVariable()];
 
             collections.value = collections.value.map(collection => {
-                if (collection.id !== collectionId) {
+                if (collection.id !== activeCollection.value!.id) {
                     return collection;
                 }
 
@@ -124,45 +152,34 @@ export const useEnvironmentVariablesStore = defineStore(
             });
         };
 
-        const updateActiveCollectionName = (name: string) => {
-            if (!activeCollection.value) {
-                return;
-            }
-
-            updateCollectionName(activeCollection.value.id, name);
-
-            sealNewCollectionName();
+        const completeRenaming = () => {
+            isRenamingActiveCollection.value = false;
         };
 
-        const updateActiveCollectionVariables = (variables: EnvironmentVariable[]) => {
-            if (!activeCollection.value) {
-                return;
-            }
+        onMounted(() => (isRenamingActiveCollection.value = false));
 
-            updateCollectionVariables(activeCollection.value.id, variables);
-        };
-
-        const sealNewCollectionName = () => {
-            isPickingCollectionName.value = false;
-        };
-
-        onMounted(() => (isPickingCollectionName.value = false));
+        /*
+         * Public API.
+         */
 
         return {
+            // State (Exposed for reactivity in lists, but actions preferred for modification)
             collections,
             activeCollectionId,
-            nextVariableId,
+            isRenamingActiveCollection,
+
+            // Getters
             activeCollection,
             variables,
-            isPickingCollectionName,
-            setActiveCollection,
-            sealNewCollectionName,
+            hasCollections,
+
+            // Actions
+            select,
             addCollection,
             removeCollection,
-            updateCollectionName,
-            updateCollectionVariables,
-            updateActiveCollectionName,
-            updateActiveCollectionVariables,
+            renameActive,
+            updateVariables,
+            completeRenaming,
         };
     },
     {

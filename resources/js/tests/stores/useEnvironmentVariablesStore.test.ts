@@ -28,7 +28,7 @@ describe('useEnvironmentVariablesStore', () => {
         const store = useEnvironmentVariablesStore();
         store.addCollection();
 
-        store.updateActiveCollectionName('Local API');
+        store.renameActive('Local API');
 
         expect(store.activeCollection?.name).toBe('Local API');
     });
@@ -37,7 +37,7 @@ describe('useEnvironmentVariablesStore', () => {
         const store = useEnvironmentVariablesStore();
         store.addCollection();
 
-        store.updateActiveCollectionVariables([]);
+        store.updateVariables([]);
 
         expect(store.activeCollection?.variables.length).toBe(1);
         expect(store.activeCollection?.variables[0].type).toBe(ParameterType.Text);

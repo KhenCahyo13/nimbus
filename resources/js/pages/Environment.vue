@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { AppButton } from '@/components/base/button';
-import EnvironmentCollectionsManager from '@/components/domain/Environment/EnvironmentCollectionsManager.vue';
+import {
+    EnvironmentCollectionHeader,
+    EnvironmentCollectionList,
+    EnvironmentVariablesEditor,
+} from '@/components/domain/Environment';
 import PageLayout from '@/components/layout/PageLayout.vue';
 import { useEnvironmentVariablesStore } from '@/stores';
 import { Layers3Icon, PlusIcon } from 'lucide-vue-next';
-
-defineOptions({
-    name: 'EnvironmentPage',
-});
 
 const environmentVariablesStore = useEnvironmentVariablesStore();
 </script>
 
 <template>
-    <PageLayout title="Environments" :icon="Layers3Icon">
+    <PageLayout title="Environments" :icon="Layers3Icon" data-testid="environment-page">
         <template #subheader-left>
             <div>
                 <span class="text-sm">Global application variables</span>
@@ -34,7 +34,30 @@ const environmentVariablesStore = useEnvironmentVariablesStore();
         <template #content>
             <div class="p-panel h-full overflow-auto">
                 <div class="max-w-6xl">
-                    <EnvironmentCollectionsManager />
+                    <!-- Screen Header -->
+                    <div class="mb-3">
+                        <h2 class="text-xl font-semibold">Collections</h2>
+                        <p class="text-subtle-foreground mb-1.5 text-sm leading-tight">
+                            These are namespaces and group of global variables that can be
+                            re-used across the application.
+                        </p>
+                        <p class="text-subtle-foreground text-xs leading-tight italic">
+                            Note: environment configuration is not shared between nimbus
+                            installations.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col items-start gap-2 md:flex-row">
+                        <!-- Sidebar: Collection List -->
+                        <EnvironmentCollectionList />
+
+                        <!-- Detail: Variable Editor -->
+                        <EnvironmentVariablesEditor>
+                            <template #header>
+                                <EnvironmentCollectionHeader />
+                            </template>
+                        </EnvironmentVariablesEditor>
+                    </div>
                 </div>
             </div>
         </template>
