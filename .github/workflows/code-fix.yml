@@ -146,3 +146,18 @@ jobs:
 
       - name: Check php styles
         run: vendor/bin/pint --test
+
+  status:
+    needs: [style-fix-internal, style-check-fork]
+    if: always()
+    runs-on: ubuntu-latest
+    name: Code Fix Status
+    steps:
+      - name: Check overall status
+        run: |
+          if [[ "${{ needs.style-fix-internal.result }}" == "failure" || "${{ needs.style-check-fork.result }}" == "failure" ]]; then
+            echo "One of the style jobs failed."
+            exit 1
+          fi
+          echo "All required style jobs passed or were skipped."
+          exit 0
