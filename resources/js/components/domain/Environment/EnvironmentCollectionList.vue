@@ -7,7 +7,6 @@ import { AppBadge } from '@/components/base/badge';
 import AppRoundIndicator from '@/components/base/round-indicator/AppRoundIndicator.vue';
 import { useEnvironmentVariablesStore } from '@/stores';
 import { PlusIcon } from 'lucide-vue-next';
-import { computed } from 'vue';
 
 /*
  * Stores & Dependencies.
@@ -44,25 +43,32 @@ const handleCollectionSelect = (collectionId: string) => {
             type="button"
             class="p-panel hover:bg-subtle w-full cursor-pointer rounded border text-left text-sm"
             :class="{
-                'bg-subtle': environmentVariablesStore.activeCollectionId === collection.id,
+                'bg-subtle':
+                    environmentVariablesStore.activeCollectionId === collection.id,
             }"
             @click="handleCollectionSelect(collection.id)"
         >
             <div class="flex items-center gap-1.5">
                 <div class="flex-1 gap-1 leading-tight">
                     <div class="mb-0 font-medium">{{ collection.name }}</div>
-                    <span class="text-xs"> {{ collection.variables.length }} variables </span>
+                    <span class="text-xs">
+                        {{ collection.variables.length }} variables
+                    </span>
                 </div>
                 <div class="flex items-center gap-2.5">
                     <AppBadge
-                        v-if="environmentVariablesStore.activeCollectionId === collection.id"
+                        v-if="
+                            environmentVariablesStore.activeCollectionId === collection.id
+                        "
                         variant="outline"
                         class="text-emerald-600"
                     >
                         Active
                     </AppBadge>
                     <AppRoundIndicator
-                        v-if="environmentVariablesStore.activeCollectionId === collection.id"
+                        v-if="
+                            environmentVariablesStore.activeCollectionId === collection.id
+                        "
                         class="text-emerald-600"
                     />
                     <AppRoundIndicator v-else class="text-subtle-foreground" />

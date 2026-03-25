@@ -1,7 +1,7 @@
 import { type ParameterContract, ParameterType } from '@/interfaces/ui';
 import { defineStore } from 'pinia';
-import {computed, onMounted, ref} from 'vue';
-import {useId} from "reka-ui";
+import { useId } from 'reka-ui';
+import { computed, onMounted, ref } from 'vue';
 
 /*
  * Types & Interfaces.

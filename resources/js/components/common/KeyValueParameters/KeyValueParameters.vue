@@ -41,9 +41,9 @@ export interface AppKeyValueParametersProps {
     getValueInputStatusUsing?: (
         parameter: ParameterContract,
     ) => EnvironmentPlaceholderStatus;
-    getValueInputPlaceholdersUsing?: (
+    getValueInputPlaceholderUsing?: (
         parameter: ParameterContract,
-    ) => { key: string; value: string }[];
+    ) => { key: string; value: string } | null;
 }
 
 export interface AppKeyValueParametersEmits {
@@ -59,7 +59,7 @@ const props = withDefaults(defineProps<AppKeyValueParametersProps>(), {
     freeFormTypes: false,
     class: undefined,
     getValueInputStatusUsing: undefined,
-    getValueInputPlaceholdersUsing: undefined,
+    getValueInputPlaceholderUsing: undefined,
 });
 
 const emit = defineEmits<AppKeyValueParametersEmits>();
@@ -242,11 +242,17 @@ const getValueInputClass = (parameter: ParameterContract) => {
                     <!-- Value Input -->
                     <EnvironmentVariablePlaceholderIndicator
                         v-slot="{ onMouseenter, onMouseleave }"
+                        :align-offset="5"
                         :status="
                             props.getValueInputStatusUsing?.(parameter) ??
                             EnvironmentPlaceholderStatus.None
                         "
-                        :placeholders="props.getValueInputPlaceholdersUsing?.(parameter)"
+                        :variable-key="
+                            props.getValueInputPlaceholderUsing?.(parameter)?.key
+                        "
+                        :variable-value="
+                            props.getValueInputPlaceholderUsing?.(parameter)?.value
+                        "
                     >
                         <AppInput
                             v-model="parameter.value"

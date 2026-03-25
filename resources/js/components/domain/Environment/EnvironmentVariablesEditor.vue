@@ -7,7 +7,10 @@ import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/Ke
 import PanelSubHeader from '@/components/layout/PanelSubHeader/PanelSubHeader.vue';
 import { useEnvironmentVariablesStore } from '@/stores';
 import type { EnvironmentVariable } from '@/stores/core/useEnvironmentVariablesStore';
-import { computed } from 'vue';
+import {
+    getValueInputPlaceholder,
+    getValueInputStatus,
+} from '@/utils/ui/environment-variable';
 
 /*
  * Stores & Dependencies.
@@ -42,6 +45,8 @@ const handleVariablesUpdate = (variables: EnvironmentVariable[]) => {
 
         <KeyValueParametersBuilder
             :model-value="environmentVariablesStore.variables"
+            :get-value-input-status-using="getValueInputStatus"
+            :get-value-input-placeholder-using="getValueInputPlaceholder"
             @update:parameters="handleVariablesUpdate"
         />
     </div>

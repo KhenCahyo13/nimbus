@@ -10,13 +10,7 @@ import { useEnvironmentVariablesStore } from '@/stores';
 import { templateRef } from '@vueuse/core';
 import { LucideFolderPen, Trash2Icon } from 'lucide-vue-next';
 import { EditableInput, EditablePreview, EditableRoot } from 'reka-ui';
-import {
-    type ComponentPublicInstance,
-    computed,
-    nextTick,
-    ref,
-    watch,
-} from 'vue';
+import { type ComponentPublicInstance, nextTick, ref, watch } from 'vue';
 
 /*
  * Stores & Dependencies.
@@ -84,7 +78,9 @@ const handleCollectionRemoval = () => {
     }
 
     triggerRemovalConfirmation(() => {
-        environmentVariablesStore.removeCollection(environmentVariablesStore.activeCollectionId!);
+        environmentVariablesStore.removeCollection(
+            environmentVariablesStore.activeCollectionId!,
+        );
     });
 };
 
@@ -100,7 +96,8 @@ watch(
     ([newId, picking], [oldId]) => {
         if (newId !== oldId) {
             isEditingCollectionName.value = false;
-            editingCollectionName.value = environmentVariablesStore.activeCollection?.name ?? '';
+            editingCollectionName.value =
+                environmentVariablesStore.activeCollection?.name ?? '';
             cancelRemovalConfirmation();
         }
 
@@ -136,9 +133,7 @@ watch(
                     class="bg-info/5 w-full border-none p-0 text-sm font-medium focus:ring-0 focus:outline-none"
                 />
             </EditableRoot>
-            <span v-else class="text-subtle-foreground text-xs">
-                [Collection name]
-            </span>
+            <span v-else class="text-subtle-foreground text-xs">[Collection name]</span>
         </div>
 
         <!-- Management Actions -->

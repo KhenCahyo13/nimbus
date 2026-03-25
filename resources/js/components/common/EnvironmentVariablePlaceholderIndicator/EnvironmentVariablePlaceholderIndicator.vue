@@ -1,15 +1,11 @@
 <script setup lang="ts">
-/**
- * @component EnvironmentVariablePlaceholderIndicator
- * @description Wraps an element with a hover popover showing environment variable placeholder status.
- */
 import {
     AppPopover,
     AppPopoverAnchor,
     AppPopoverContent,
 } from '@/components/base/popover';
 import { EnvironmentPlaceholderStatus } from '@/utils/request';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 /*
  * Types & Interfaces.
@@ -17,19 +13,38 @@ import { ref } from 'vue';
 
 export interface AppEnvironmentVariablePlaceholderIndicatorProps {
     status: EnvironmentPlaceholderStatus;
+    alignOffset?: number;
+    variableKey?: string;
+    variableValue?: string;
+    externalOpen?: boolean;
 }
 
 /*
  * Component Setup.
  */
 
-const props = defineProps<AppEnvironmentVariablePlaceholderIndicatorProps>();
+const props = withDefaults(
+    defineProps<AppEnvironmentVariablePlaceholderIndicatorProps>(),
+    {
+        variableKey: undefined,
+        variableValue: undefined,
+        alignOffset: 0,
+        externalOpen: undefined,
+    },
+);
 
 /*
  * State.
  */
 
-const isOpen = ref(false);
+const internalOpen = ref(false);
+
+const isOpen = computed({
+    get: () => props.externalOpen ?? internalOpen.value,
+    set: value => {
+        internalOpen.value = value;
+    },
+});
 
 /*
  * Computed & Methods.
@@ -37,12 +52,12 @@ const isOpen = ref(false);
 
 const handleMouseEnter = () => {
     if (props.status !== EnvironmentPlaceholderStatus.None) {
-        isOpen.value = true;
+        internalOpen.value = true;
     }
 };
 
 const handleMouseLeave = () => {
-    isOpen.value = false;
+    internalOpen.value = false;
 };
 </script>
 
@@ -54,32 +69,39 @@ const handleMouseLeave = () => {
 
         <AppPopoverContent
             v-if="status !== EnvironmentPlaceholderStatus.None"
-            side="top"
-            class="w-60 space-y-1"
+            side="bottom"
+            align="start"
+            class="w-fit p-0 text-xs font-medium"
+            :align-offset="alignOffset"
+            :class="{
+                'max-w-64': status !== EnvironmentPlaceholderStatus.Resolved,
+            }"
         >
-            <template v-if="status === EnvironmentPlaceholderStatus.Missing">
-                <p class="text-destructive text-sm font-medium">Variable not found</p>
-                <p class="text-muted-foreground text-xs">
-                    This field contains a placeholder referencing a variable that is not
-                    defined in the active environment collection.
+            <div
+                :class="{
+                    'p-panel': status !== EnvironmentPlaceholderStatus.Resolved,
+                    'bg-gradient-to-tr from-blue-500/5 to-transparent to-50% p-1 py-0.5 dark:from-blue-700/30':
+                        status === EnvironmentPlaceholderStatus.Resolved,
+                    'bg-gradient-to-tr from-yellow-500/5 to-transparent to-50% py-0.5 dark:from-yellow-700/30':
+                        status === EnvironmentPlaceholderStatus.Empty,
+                    'bg-gradient-to-tr from-rose-500/5 to-transparent to-50% py-0.5 dark:from-rose-700/30':
+                        status === EnvironmentPlaceholderStatus.Missing,
+                }"
+            >
+                <p
+                    v-if="status === EnvironmentPlaceholderStatus.Missing"
+                    class="text-muted-foreground leading-tight"
+                >
+                    The referenced variable cannot be found in the selected collection.
                 </p>
-            </template>
-
-            <template v-else-if="status === EnvironmentPlaceholderStatus.Empty">
-                <p class="text-warning text-sm font-medium">Variable is empty</p>
-                <p class="text-muted-foreground text-xs">
-                    This field contains a placeholder referencing a variable that exists
-                    but has no value set.
+                <p
+                    v-else-if="status === EnvironmentPlaceholderStatus.Empty"
+                    class="text-muted-foreground leading-tight"
+                >
+                    The referenced variable is found, but its value is empty.
                 </p>
-            </template>
-
-            <template v-else-if="status === EnvironmentPlaceholderStatus.Resolved">
-                <p class="text-primary text-sm font-medium">Variable resolved</p>
-                <p class="text-muted-foreground text-xs">
-                    All placeholders in this field have been resolved from the active
-                    environment collection.
-                </p>
-            </template>
+                <span v-else>&lt;{{ variableValue }}&gt;</span>
+            </div>
         </AppPopoverContent>
     </AppPopover>
 </template>

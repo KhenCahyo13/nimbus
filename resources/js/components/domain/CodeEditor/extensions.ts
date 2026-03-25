@@ -52,6 +52,7 @@ export const environmentPlaceholderHighlightExtension = (
         const diagnostics: Diagnostic[] = [];
         const text = view.state.doc.toString();
         const variablesMap = createEnvironmentVariablesMap(variables);
+        const source = 'environments-variables-replacement';
 
         for (const match of text.matchAll(placeholderPattern)) {
             const from = match.index;
@@ -77,6 +78,7 @@ export const environmentPlaceholderHighlightExtension = (
                     to: from + value.length,
                     severity: 'info',
                     message: 'Environment variable resolved.',
+                    source,
                 });
 
                 continue;
@@ -87,7 +89,8 @@ export const environmentPlaceholderHighlightExtension = (
                     from,
                     to: from + value.length,
                     severity: 'warning',
-                    message: 'Environment variable exists but value is empty.',
+                    message: 'The referenced variable is found, but its value is empty.',
+                    source,
                 });
 
                 continue;
@@ -97,7 +100,9 @@ export const environmentPlaceholderHighlightExtension = (
                 from,
                 to: from + value.length,
                 severity: 'error',
-                message: 'Environment variable was not found in active collection.',
+                message:
+                    'The referenced variable cannot be found in the selected collection.',
+                source,
             });
         }
 

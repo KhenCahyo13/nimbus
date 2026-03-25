@@ -8,7 +8,10 @@ import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/Ke
 import PanelSubHeader from '@/components/layout/PanelSubHeader/PanelSubHeader.vue';
 import { type ParameterContract } from '@/interfaces/ui';
 import { useRequestStore } from '@/stores';
-import { getValueInputStatus } from '@/utils/ui/environment-variable';
+import {
+    getValueInputPlaceholder,
+    getValueInputStatus,
+} from '@/utils/ui/environment-variable';
 import { useClipboard } from '@vueuse/core';
 import { computed } from 'vue';
 
@@ -68,6 +71,7 @@ const copyPreview = () => copy(preview.value);
         :model-value="currentRequestQueryParameters"
         class="flex-1"
         :get-value-input-status-using="getValueInputStatus"
+        :get-value-input-placeholder-using="getValueInputPlaceholder"
         @update:parameters="handleQueryParametersUpdate"
     />
 </template>

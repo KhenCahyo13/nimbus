@@ -9,6 +9,10 @@ import PageLayout from '@/components/layout/PageLayout.vue';
 import { useEnvironmentVariablesStore } from '@/stores';
 import { Layers3Icon, PlusIcon } from 'lucide-vue-next';
 
+defineOptions({
+    name: 'EnvironmentPage',
+});
+
 const environmentVariablesStore = useEnvironmentVariablesStore();
 </script>
 

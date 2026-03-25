@@ -10,7 +10,10 @@ import { type SourceGlobalHeaders } from '@/interfaces/http';
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
 import { useConfigStore, useRequestStore, useValueGeneratorStore } from '@/stores';
-import { getValueInputStatus } from '@/utils/ui/environment-variable';
+import {
+    getValueInputPlaceholder,
+    getValueInputStatus,
+} from '@/utils/ui/environment-variable';
 import { generateValueFromType } from '@/utils/value-generator/generateValueFromType';
 import { computed, onBeforeMount, type Ref, ref } from 'vue';
 
@@ -98,6 +101,7 @@ onBeforeMount(() => {
         ref="parametersBuilder"
         :model-value="effectiveHeaders"
         :get-value-input-status-using="getValueInputStatus"
+        :get-value-input-placeholder-using="getValueInputPlaceholder"
         @update:parameters="handleHeadersUpdate"
     />
 </template>

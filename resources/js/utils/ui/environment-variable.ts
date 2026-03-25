@@ -5,6 +5,7 @@ import type { EnvironmentPlaceholderStatus } from '../request';
 import {
     createEnvironmentVariablesMap,
     getEnvironmentPlaceholderStatus,
+    getResolvedPlaceholder,
 } from '../request';
 
 export const activeVariables = computed(
@@ -19,6 +20,16 @@ export const getValueInputStatus = (
     parameter: ParameterContract,
 ): EnvironmentPlaceholderStatus => {
     return getEnvironmentPlaceholderStatus(
+        parameter.value,
+        activeVariables.value,
+        activeVariablesMap.value,
+    );
+};
+
+export const getValueInputPlaceholder = (
+    parameter: ParameterContract,
+): { key: string; value: string } | null => {
+    return getResolvedPlaceholder(
         parameter.value,
         activeVariables.value,
         activeVariablesMap.value,

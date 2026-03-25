@@ -66,19 +66,27 @@ export function useRouteSegmentSelection(
      */
 
     /**
-     * Identifies which segments in a URL path are variables (wrapped in braces).
+     * Identifies which segments in a URL path are route variables (wrapped in single braces).
+     *
+     * Note: Environment variables (double braces like {{host}}) are explicitly excluded
+     * from auto-selection as they are managed by env variable replacement logic.
      *
      * @param url - The URL path to analyze (e.g., 'api/users/{id}/posts')
-     * @returns Array of segment indices that are variables (0-based)
+     * @returns Array of segment indices that are route variables (0-based)
      */
     const identifyVariableSegments = (url: string): number[] => {
         const segments = url.split('/');
         const indices: number[] = [];
 
         segments.forEach((segment: string, index: number) => {
-            const isVariable = segment.startsWith('{') && segment.endsWith('}');
+            // A segment is a candidate for auto-selection only if it is a single-brace route variable.
+            const isRouteVariable =
+                segment.startsWith('{') &&
+                segment.endsWith('}') &&
+                !segment.startsWith('{{') &&
+                !segment.endsWith('}}');
 
-            if (isVariable) {
+            if (isRouteVariable) {
                 indices.push(index);
             }
         });
@@ -147,9 +155,23 @@ export function useRouteSegmentSelection(
             return null;
         }
 
+        // Exclude environment variables (double braces) from on-the-fly brace detection.
+        // We only want to auto-select single-brace path parameters.
+        const isDoubleBrace =
+            text[openingBracePos - 1] === '{' || text[openingBracePos + 1] === '{';
+
+        if (isDoubleBrace) {
+            return null;
+        }
+
         const closingBracePos = findClosingBracePosition(text, cursorPos);
 
         if (closingBracePos === -1) {
+            return null;
+        }
+
+        // Verify the closing side is also not part of a double brace.
+        if (text[closingBracePos] === '}') {
             return null;
         }
 
