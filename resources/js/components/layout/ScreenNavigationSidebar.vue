@@ -53,17 +53,16 @@ const coreItems = [
         icon: TerminalIcon,
         isActive: true,
     },
-
-    {
-        title: 'Settings',
-        route: { name: 'settings' },
-        icon: SettingsIcon,
-        isActive: false,
-    },
     {
         title: 'Environments',
         route: { name: 'environments' },
         icon: Layers3Icon,
+        isActive: false,
+    },
+    {
+        title: 'Settings',
+        route: { name: 'settings' },
+        icon: SettingsIcon,
         isActive: false,
     },
 ];
