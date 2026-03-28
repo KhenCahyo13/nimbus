@@ -1,13 +1,10 @@
 import { type ParameterContract, ParameterType } from '@/interfaces';
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { AuthorizationType } from '@/interfaces/generated';
 import type { RequestLog } from '@/interfaces/history/logs';
 import type { RelayProxyResponse } from '@/interfaces/http';
-import type {
-    PendingRequest,
-    Request,
-    ResolvableString,
-} from '@/interfaces/http/request';
+import type { PendingRequest, Request } from '@/interfaces/http/request';
 import { RequestBodyTypeEnum } from '@/interfaces/http/request';
 import type { ErrorPlainResponse, Response } from '@/interfaces/http/response';
 import { STATUS } from '@/interfaces/http/status';

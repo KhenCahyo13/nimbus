@@ -1,7 +1,7 @@
 import type { ParameterContract } from '@/interfaces';
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
 import type { ResolvableString } from '@/interfaces/common/resolvable';
-import type { AuthorizationType } from '@/interfaces/generated';
+import { AuthorizationType } from '@/interfaces/generated';
 import type { PendingRequest } from '@/interfaces/http';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';

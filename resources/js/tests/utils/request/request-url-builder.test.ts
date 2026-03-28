@@ -175,10 +175,10 @@ describe('request-url-builder', () => {
             const params: ParameterContract[] = [
                 // @ts-expect-error testing edge case.
                 { type: ParameterType.Text, key: 'nullVal', value: null, enabled: true },
-                // @ts-expect-error testing edge case.
                 {
                     type: ParameterType.Text,
                     key: 'undefVal',
+                    // @ts-expect-error testing edge case.
                     value: undefined,
                     enabled: true,
                 },

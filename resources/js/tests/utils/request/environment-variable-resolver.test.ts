@@ -43,45 +43,80 @@ describe('environment-variable-resolver', () => {
     const variablesMap = createEnvVariablesMap(variables);
 
     it('resolves string placeholders from enabled variables', () => {
-        const resolved = replaceEnvVariablesInString(
-            '/api/{{host}}?token={{ token }}',
-            variablesMap,
-        );
+        // Arrange
+
+        const url = '/api/{{host}}?token={{ token }}';
+
+        // Act
+
+        const resolved = replaceEnvVariablesInString(url, variablesMap);
+
+        // Assert
 
         expect(resolved).toBe('/api/localhost?token=abc123');
     });
 
     it('keeps unknown placeholders unchanged', () => {
-        const resolved = replaceEnvVariablesInString('/api/{{missing}}', variablesMap);
+        // Arrange
+
+        const url = '/api/{{missing}}';
+
+        // Act
+
+        const resolved = replaceEnvVariablesInString(url, variablesMap);
+
+        // Assert
 
         expect(resolved).toBe('/api/{{missing}}');
     });
 
     it('returns missing status when placeholder key does not exist', () => {
-        const status = checkEnvVariable('/api/{{missing}}', variablesMap);
+        // Arrange
+
+        const url = '/api/{{missing}}';
+
+        // Act
+
+        const status = checkEnvVariable(url, variablesMap);
+
+        // Assert
 
         expect(status).toBe(EnvVariableCheckStatus.Missing);
     });
 
     it('returns empty status when placeholder exists but value is empty', () => {
-        const status = checkEnvVariable(
-            '/api/{{empty}}',
-            createEnvVariablesMap([
-                ...variables,
-                {
-                    type: ParameterType.Text,
-                    key: 'empty',
-                    value: { raw: '', resolved: '' },
-                    enabled: true,
-                },
-            ]),
-        );
+        // Arrange
+
+        const url = '/api/{{empty}}';
+        const customVariables = createEnvVariablesMap([
+            ...variables,
+            {
+                type: ParameterType.Text,
+                key: 'empty',
+                value: { raw: '', resolved: '' },
+                enabled: true,
+            },
+        ]);
+
+        // Act
+
+        const status = checkEnvVariable(url, customVariables);
+
+        // Assert
 
         expect(status).toBe(EnvVariableCheckStatus.Empty);
     });
 
     it('returns resolved status when all placeholders are available and non-empty', () => {
-        const status = checkEnvVariable('/api/{{host}}?token={{token}}', variablesMap);
+        // Arrange
+
+        const url = '/api/{{host}}?token={{token}}';
+
+        // Act
+
+        const status = checkEnvVariable(url, variablesMap);
+
+        // Assert
 
         expect(status).toBe(EnvVariableCheckStatus.Resolved);
     });
