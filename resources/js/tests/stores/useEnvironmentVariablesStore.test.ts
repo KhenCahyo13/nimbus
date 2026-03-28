@@ -19,7 +19,7 @@ describe('useEnvironmentVariablesStore', () => {
         expect(store.collections[0].variables[0]).toMatchObject({
             type: ParameterType.Text,
             key: '',
-            value: '',
+            value: { raw: '', resolved: '' },
             enabled: true,
         });
     });

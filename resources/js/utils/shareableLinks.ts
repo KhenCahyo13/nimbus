@@ -9,7 +9,6 @@ import type { ResolvableString } from '@/interfaces/common/resolvable';
 import type { RequestLog } from '@/interfaces/history/logs';
 import type { PendingRequest, RequestBodyTypeEnum, Response } from '@/interfaces/http';
 import type { ShareableLinkPayload } from '@/interfaces/share';
-import { resolveResolvableString } from '@/utils/request';
 import pako from 'pako';
 
 /**
@@ -29,14 +28,14 @@ export function encodeShareablePayload(
 ): string {
     const payload: ShareableLinkPayload = {
         method: pendingRequest.method,
-        endpoint: resolveResolvableString(pendingRequest.endpoint),
+        endpoint: pendingRequest.endpoint.resolved,
         headers: pendingRequest.headers.map(header => ({
             key: header.key,
-            value: resolveResolvableString(header.value),
+            value: header.value.resolved,
         })),
         queryParameters: pendingRequest.queryParameters.map(param => ({
             key: param.key,
-            value: resolveResolvableString(param.value),
+            value: param.value.resolved,
             type: param.type,
         })),
         body: resolveBody(pendingRequest.body),
@@ -97,8 +96,8 @@ export function buildShareableUrl(basePath: string, encodedPayload: string): str
 function buildAuthorizationValue(value: AuthorizationContract['value']) {
     if (typeof value === 'object' && 'username' in value) {
         return {
-            username: resolveResolvableString(value.username),
-            password: resolveResolvableString(value.password),
+            username: value.username.resolved,
+            password: value.password.resolved,
         };
     }
 
@@ -106,7 +105,7 @@ function buildAuthorizationValue(value: AuthorizationContract['value']) {
         return value;
     }
 
-    return resolveResolvableString(value);
+    return value.resolved;
 }
 
 function resolveBody(body: {
@@ -136,9 +135,7 @@ function resolveBody(body: {
             }
 
             methodBody[type] =
-                value !== null && value !== undefined
-                    ? resolveResolvableString(value as ResolvableString)
-                    : value;
+                value !== null && value !== undefined ? value.resolved : value;
         }
 
         resolvedBody[method] = methodBody;

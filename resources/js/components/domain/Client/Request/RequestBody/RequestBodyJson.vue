@@ -7,7 +7,6 @@ import CodeEditor from '@/components/domain/CodeEditor/CodeEditor.vue';
 import { envVariablesCheck } from '@/components/domain/CodeEditor/extensions';
 import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { useEnvironmentVariablesStore } from '@/stores';
-import { rawResolvableString } from '@/utils/request';
 import {
     checkEnvVariable,
     replaceEnvVariablesInString,
@@ -30,7 +29,7 @@ export interface AppRequestBodyJsonProps {
 defineProps<AppRequestBodyJsonProps>();
 
 const model = defineModel<ResolvableString>({
-    default: () => '',
+    default: () => ({ raw: '', resolved: '' }),
 });
 
 const environmentVariablesStore = useEnvironmentVariablesStore();
@@ -40,7 +39,7 @@ const envVariablesMap = computed(() => {
 });
 
 const modelProxy = computed({
-    get: () => rawResolvableString(model.value),
+    get: () => model.value.raw,
     set: value => {
         model.value = {
             raw: value,

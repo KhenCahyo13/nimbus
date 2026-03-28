@@ -267,7 +267,7 @@ describe('useTabsStoreUnitTest', () => {
             store.lastSyncedGlobalHeaders = [
                 {
                     key: 'X-App-1',
-                    value: 'value-1',
+                    value: { raw: 'value-1', resolved: 'value-1' },
                     type: ParameterType.Text,
                     enabled: true,
                 },
@@ -315,7 +315,10 @@ describe('useTabsStoreUnitTest', () => {
 
             expect(store.tabs).toHaveLength(1);
             expect(store.activeTabId).toMatch(/^[0-9a-f-]{36}$/);
-            expect(store.activeRequest?.endpoint).toEqual('shared-route');
+            expect(store.activeRequest?.endpoint).toEqual({
+                raw: 'shared-route',
+                resolved: 'shared-route',
+            });
         });
     });
 });

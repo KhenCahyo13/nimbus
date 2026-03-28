@@ -1,5 +1,4 @@
-import type { ResolvableString } from '@/interfaces/common/resolvable';
-import type { PendingRequest, RequestHeader } from '@/interfaces/http';
+import type { ParameterContract, PendingRequest, ResolvableString } from '@/interfaces';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import { useRequestStore } from '@/stores';
 import {
@@ -106,9 +105,9 @@ export function useRequestBody(): UseRequestBodyResult {
      * to match the corresponding MIME type if found.
      */
     const initializePayloadTypeFromHeaders = () => {
-        const currentContentType: RequestHeader | undefined =
+        const currentContentType: ParameterContract | undefined =
             pendingRequestData.value?.headers.find(
-                (header: RequestHeader) => header.key === 'Content-Type',
+                (header: ParameterContract) => header.key === 'Content-Type',
             );
 
         if (!currentContentType) {
@@ -117,11 +116,7 @@ export function useRequestBody(): UseRequestBodyResult {
 
         const matchingTypeFromContentType: TypeShape | undefined = types.find(
             function (type) {
-                const currentType =
-                    typeof currentContentType.value === 'object' &&
-                    currentContentType.value !== null
-                        ? (currentContentType.value?.resolved ?? currentContentType.value)
-                        : currentContentType.value;
+                const currentType = currentContentType.value.resolved;
 
                 return type.mimeType === currentType;
             },

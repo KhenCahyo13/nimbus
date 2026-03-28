@@ -103,8 +103,14 @@ describe('content-type-header-generator', () => {
             // Arrange
 
             const headers = [
-                { key: 'Accept', value: 'application/json' },
-                { key: 'content-type', value: 'text/plain' },
+                {
+                    key: 'Accept',
+                    value: 'application/json',
+                },
+                {
+                    key: 'content-type',
+                    value: 'text/plain',
+                },
             ];
 
             // Act
@@ -123,8 +129,14 @@ describe('content-type-header-generator', () => {
             // Arrange
 
             const headers = [
-                { key: 'Accept', value: 'application/json' },
-                { key: 'content-type', value: 'application/json' },
+                {
+                    key: 'Accept',
+                    value: 'application/json',
+                },
+                {
+                    key: 'content-type',
+                    value: 'application/json',
+                },
             ];
 
             // Act
@@ -154,8 +166,14 @@ describe('content-type-header-generator', () => {
             // Arrange
 
             const headers = [
-                { key: 'Accept', value: 'application/json' },
-                { key: 'Content-Type', value: 'text/plain' },
+                {
+                    key: 'Accept',
+                    value: 'application/json',
+                },
+                {
+                    key: 'Content-Type',
+                    value: 'text/plain',
+                },
             ];
 
             // Act
@@ -200,8 +218,14 @@ describe('content-type-header-generator', () => {
             // Assert
 
             expect(result).toEqual([
-                { key: 'Accept', value: 'application/json' },
-                { key: 'content-type', value: 'multipart/form-data' },
+                {
+                    key: 'Accept',
+                    value: 'application/json',
+                },
+                {
+                    key: 'content-type',
+                    value: 'multipart/form-data',
+                },
             ]);
         });
 
@@ -220,8 +244,14 @@ describe('content-type-header-generator', () => {
             // Assert
 
             expect(result).toEqual([
-                { key: 'Accept', value: 'application/json' },
-                { key: 'content-type', value: 'text/plain' },
+                {
+                    key: 'Accept',
+                    value: 'application/json',
+                },
+                {
+                    key: 'content-type',
+                    value: 'text/plain',
+                },
             ]);
         });
     });

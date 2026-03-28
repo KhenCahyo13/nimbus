@@ -13,7 +13,7 @@ describe('request-url-builder', () => {
 
             const param: ParameterContract = {
                 key: 'page',
-                value: '1',
+                value: { raw: '1', resolved: '1' },
                 enabled: true,
                 type: ParameterType.Text,
             };
@@ -32,7 +32,7 @@ describe('request-url-builder', () => {
 
             const param: ParameterContract = {
                 key: '  ',
-                value: '1',
+                value: { raw: '1', resolved: '1' },
                 enabled: true,
                 type: ParameterType.Text,
             };
@@ -65,8 +65,18 @@ describe('request-url-builder', () => {
             // Arrange
 
             const params: ParameterContract[] = [
-                { key: 'page', value: '1', enabled: true, type: ParameterType.Text },
-                { key: 'limit', value: '10', enabled: true, type: ParameterType.Text },
+                {
+                    key: 'page',
+                    value: { raw: '1', resolved: '1' },
+                    enabled: true,
+                    type: ParameterType.Text,
+                },
+                {
+                    key: 'limit',
+                    value: { raw: '10', resolved: '10' },
+                    enabled: true,
+                    type: ParameterType.Text,
+                },
             ];
 
             // Act
@@ -82,8 +92,18 @@ describe('request-url-builder', () => {
             // Arrange
 
             const params: ParameterContract[] = [
-                { key: '', value: 'val', enabled: true, type: ParameterType.Text },
-                { key: 'valid', value: 'ok', enabled: true, type: ParameterType.Text },
+                {
+                    key: '',
+                    value: { raw: 'val', resolved: 'val' },
+                    enabled: true,
+                    type: ParameterType.Text,
+                },
+                {
+                    key: 'valid',
+                    value: { raw: 'ok', resolved: 'ok' },
+                    enabled: true,
+                    type: ParameterType.Text,
+                },
             ];
 
             // Act
@@ -182,7 +202,12 @@ describe('request-url-builder', () => {
                     value: undefined,
                     enabled: true,
                 },
-                { type: ParameterType.Text, key: 'valid', value: 'ok', enabled: true },
+                {
+                    type: ParameterType.Text,
+                    key: 'valid',
+                    value: { raw: 'ok', resolved: 'ok' },
+                    enabled: true,
+                },
             ];
 
             // Act

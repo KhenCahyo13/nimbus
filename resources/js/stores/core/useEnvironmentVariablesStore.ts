@@ -1,5 +1,4 @@
 import { type ParameterContract, ParameterType } from '@/interfaces/ui';
-import { resolveResolvableString } from '@/utils/request';
 import { defineStore } from 'pinia';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
@@ -57,7 +56,7 @@ export const useEnvironmentVariablesStore = defineStore(
             id: generateVariableId(),
             type: ParameterType.Text,
             key: '',
-            value: '',
+            value: { raw: '', resolved: '' },
             enabled: true,
         });
 
@@ -80,7 +79,7 @@ export const useEnvironmentVariablesStore = defineStore(
                 .filter(variable => variable.enabled && variable.key.trim() !== '')
                 .map((parameter: ParameterContract) => [
                     parameter.key.trim(),
-                    resolveResolvableString(parameter.value),
+                    parameter.value.resolved,
                 ]);
 
             return new Map(variables);
@@ -167,10 +166,6 @@ export const useEnvironmentVariablesStore = defineStore(
         };
 
         onMounted(() => (isRenamingActiveCollection.value = false));
-
-        /*
-         * Public API.
-         */
 
         return {
             // State

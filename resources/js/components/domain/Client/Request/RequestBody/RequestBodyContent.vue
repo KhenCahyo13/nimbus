@@ -58,7 +58,7 @@ const updatePayload = (value: FormData | ResolvableString | null) => {
         />
         <RequestBodyPlainText
             v-else-if="payloadType === RequestBodyTypeEnum.PLAIN_TEXT"
-            :model-value="payload as string"
+            :model-value="payload as ResolvableString"
             @update:model-value="updatePayload"
         />
         <div v-else>

@@ -75,10 +75,8 @@ export function useEnvVariablesAwareString(
     watch(
         source,
         (newSource: ResolvableString) => {
-            const newRaw = typeof newSource === 'object' ? newSource.raw : newSource;
-
-            if (newRaw !== rawValue.value) {
-                rawValue.value = newRaw;
+            if (newSource.raw !== rawValue.value) {
+                rawValue.value = newSource.raw;
             }
         },
         { immediate: true },
@@ -89,10 +87,8 @@ export function useEnvVariablesAwareString(
      */
     watch([rawValue, fullyResolvedString], ([newRaw, newResolved]) => {
         const currentSource = source.value;
-        const currentRaw =
-            typeof currentSource === 'object' ? currentSource.raw : currentSource;
 
-        if (newRaw !== currentRaw) {
+        if (newRaw !== currentSource.raw) {
             source.value = { raw: newRaw, resolved: newResolved } as ResolvableString;
         }
     });

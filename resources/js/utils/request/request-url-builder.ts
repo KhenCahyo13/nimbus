@@ -1,5 +1,4 @@
 import type { ParameterContract } from '@/interfaces';
-import { resolveResolvableString } from '@/utils/common/resolvable';
 
 /**
  * Checks if a query parameter is valid for inclusion in URLs.
@@ -29,7 +28,7 @@ export function buildRequestUrl(
         appendQueryParam(
             url.searchParams,
             parameter.key,
-            resolveResolvableString(parameter.value),
+            parameter.value?.resolved ?? '',
         );
     });
 

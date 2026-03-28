@@ -5,7 +5,6 @@ import {
     createRequestTimer,
     generateErrorRequestLog,
     generateSuccessRequestLog,
-    rawResolvableString,
 } from '@/utils/request';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
@@ -41,7 +40,7 @@ export const useRequestExecutorStore = defineStore('_requestExecutor', () => {
         return (
             requestData !== null &&
             !requestData.isProcessing &&
-            rawResolvableString(requestData.endpoint).trim() !== ''
+            requestData.endpoint.raw.trim() !== ''
         );
     });
 

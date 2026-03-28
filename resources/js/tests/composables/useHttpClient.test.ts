@@ -3,7 +3,7 @@ import { AuthorizationType } from '@/interfaces/generated';
 import { createMockRelayProxyResponse } from '@/tests/_utils/test-factories';
 import axios from 'axios';
 import type { Mocked } from 'vitest';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 /*
  * Fixtures.
@@ -30,7 +30,7 @@ const createMockPendingRequest = (
     overrides: Partial<PendingRequest> = {},
 ): PendingRequest => ({
     method: 'GET',
-    endpoint: '/api/users',
+    endpoint: { raw: '/api/users', resolved: '/api/users' },
     headers: [],
     body: {
         GET: {
@@ -57,6 +57,10 @@ describe('useHttpClient', () => {
      * Initialization tests.
      */
 
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     describe('Initialization', () => {
         it('should initialize with correct default state', () => {
             // Act
@@ -80,15 +84,20 @@ describe('useHttpClient', () => {
             const { buildUrlFromRequest } = useHttpClient();
 
             const request = createMockPendingRequest({
-                endpoint: 'api/users',
+                endpoint: { raw: 'api/users', resolved: 'api/users' },
                 authorization: {
                     type: AuthorizationType.None,
                 },
                 queryParameters: [
-                    { key: 'page', value: '1', enabled: true, type: ParameterType.Text },
+                    {
+                        key: 'page',
+                        value: { raw: '1', resolved: '1' },
+                        enabled: true,
+                        type: ParameterType.Text,
+                    },
                     {
                         key: 'limit',
-                        value: '10',
+                        value: { raw: '10', resolved: '10' },
                         enabled: true,
                         type: ParameterType.Text,
                     },
@@ -110,7 +119,7 @@ describe('useHttpClient', () => {
             const { buildUrlFromRequest } = useHttpClient();
 
             const request = createMockPendingRequest({
-                endpoint: '//api/users',
+                endpoint: { raw: '//api/users', resolved: '//api/users' },
                 authorization: {
                     type: AuthorizationType.None,
                 },
@@ -134,7 +143,10 @@ describe('useHttpClient', () => {
                 method: 'POST',
                 body: {
                     POST: {
-                        [RequestBodyTypeEnum.JSON]: JSON.stringify({ name: 'John' }),
+                        [RequestBodyTypeEnum.JSON]: {
+                            raw: JSON.stringify({ name: 'John' }),
+                            resolved: JSON.stringify({ name: 'John' }),
+                        },
                     },
                 },
                 headers: [],

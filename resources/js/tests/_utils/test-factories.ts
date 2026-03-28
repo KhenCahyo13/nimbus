@@ -99,7 +99,7 @@ export const createMockPendingRequest = (
 
 export interface MockHeaderOverrides {
     key?: string;
-    value?: string;
+    value?: ResolvableString;
     type?: ParameterType;
     enabled?: boolean;
 }
@@ -118,7 +118,7 @@ export const createMockHeaders = (count: number): ParameterContract[] => {
     return Array.from({ length: count }, (_, index) =>
         createMockHeader({
             key: `X-Custom-Header-${index}`,
-            value: `value-${index}`,
+            value: { raw: `value-${index}`, resolved: `value-${index}` },
         }),
     );
 };

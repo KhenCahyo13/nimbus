@@ -1,9 +1,6 @@
 import { httpClientConfig } from '@/config';
-import type {
-    AuthorizationContract,
-    ParameterContract,
-    RequestHeader,
-} from '@/interfaces';
+import type { AuthorizationContract, ParameterContract } from '@/interfaces';
+import { AuthorizationType } from '@/interfaces/generated';
 import type {
     HttpHeaders,
     PendingRequest,
@@ -13,7 +10,6 @@ import type {
 import { useConfigStore } from '@/stores';
 import { buildRequestUrl } from '@/utils';
 import { convertPayloadToFormData, getStatusGroup } from '@/utils/http';
-import { resolveResolvableString } from '@/utils/request';
 import { generateContentTypeHeader } from '@/utils/request/content-type-header-generator';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
@@ -54,7 +50,7 @@ export function useHttpClient(): UseHttpClientResult {
 
     const buildUrlFromRequest = (request: PendingRequest): string => {
         // Remove leading slashes to prevent double slashes in final URL
-        const endpoint = resolveResolvableString(request.endpoint).replace(/^\/+/, '');
+        const endpoint = request.endpoint.resolved.replace(/^\/+/, '');
 
         return buildRequestUrl(
             configStore.apiUrl,
@@ -84,40 +80,29 @@ export function useHttpClient(): UseHttpClientResult {
             return null;
         }
 
-        return resolveResolvableString(body);
+        return body.resolved;
     };
 
     function buildRelayAuthorization(authorization: AuthorizationContract) {
-        if (!authorization.value) {
-            return {
-                type: authorization.type,
-            };
-        }
+        switch (authorization.type) {
+            case AuthorizationType.Basic:
+                return {
+                    type: authorization.type,
+                    value: {
+                        username: authorization.value.username.resolved,
+                        password: authorization.value.password.resolved,
+                    },
+                };
 
-        if (
-            typeof authorization.value === 'object' &&
-            'username' in authorization.value
-        ) {
-            return {
-                type: authorization.type,
-                value: {
-                    username: resolveResolvableString(authorization.value.username),
-                    password: resolveResolvableString(authorization.value.password),
-                },
-            };
-        }
+            case AuthorizationType.Bearer:
+                return {
+                    type: authorization.type,
+                    value: authorization.value.resolved,
+                };
 
-        if (typeof authorization.value === 'number') {
-            return {
-                type: authorization.type,
-                value: authorization.value,
-            };
+            default:
+                return authorization;
         }
-
-        return {
-            type: authorization.type,
-            value: resolveResolvableString(authorization.value),
-        };
     }
 
     const createRelayPayload = (request: PendingRequest) => {
@@ -131,9 +116,9 @@ export function useHttpClient(): UseHttpClientResult {
                         parameter.enabled && parameter.key.trim() !== '',
                 )
                 .map(
-                    (parameter): RequestHeader => ({
+                    (parameter): HttpHeaders => ({
                         key: parameter.key,
-                        value: resolveResolvableString(parameter.value),
+                        value: parameter.value.resolved,
                     }),
                 ),
         );

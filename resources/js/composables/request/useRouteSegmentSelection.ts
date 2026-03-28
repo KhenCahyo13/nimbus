@@ -1,5 +1,4 @@
 import type { ResolvableString } from '@/interfaces/common/resolvable';
-import { rawResolvableString } from '@/utils/request';
 import { type DeepReadonly, type Ref, nextTick, readonly, ref, watch } from 'vue';
 
 export interface UseRouteSegmentSelectionOptions {
@@ -307,16 +306,13 @@ export function useRouteSegmentSelection(
      * Watchers.
      */
 
-    // Watch for endpoint changes to track variable segments
     watch(
         endpoint,
         (newValue: ResolvableString) => {
-            const hasVariableSegments = rawResolvableString(newValue)?.includes('{');
+            const hasVariableSegments = newValue.raw.includes('{');
 
             if (hasVariableSegments) {
-                variableSegmentIndices.value = identifyVariableSegments(
-                    rawResolvableString(newValue),
-                );
+                variableSegmentIndices.value = identifyVariableSegments(newValue.raw);
             }
         },
         { immediate: true },

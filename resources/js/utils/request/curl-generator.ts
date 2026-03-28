@@ -6,7 +6,6 @@ import type { PendingRequest } from '@/interfaces/http';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
 import { buildRequestUrl } from '@/utils';
-import { resolveResolvableString } from '@/utils/common/resolvable';
 import { getMimeTypeForPayloadType } from '@/utils/request/content-type-header-generator';
 
 /**
@@ -31,11 +30,7 @@ export function generateCurlCommand(
         getEffectiveQueryParametersAndBodyValue(request);
 
     const methodPart = buildHttpMethodPart(request.method);
-    const fullUrl = buildRequestUrl(
-        baseUrl,
-        resolveResolvableString(request.endpoint),
-        queryParameters,
-    );
+    const fullUrl = buildRequestUrl(baseUrl, request.endpoint.resolved, queryParameters);
     const headerParts = buildRequestHeaderParts(request);
     const authPart = buildAuthorizationHeaderPart(request.authorization);
     const bodyParts = buildRequestBodyParts(requestBody);
@@ -105,7 +100,7 @@ function buildRequestHeaderParts(request: PendingRequest): string[] {
     const validHeaders = getValidHeaders(request);
 
     const headerParts = validHeaders.map(function (header) {
-        const headerValue = resolveResolvableString(header.value);
+        const headerValue = header.value.resolved;
 
         return `-H "${header.key}: ${headerValue}"`;
     });
@@ -175,7 +170,7 @@ function buildAuthHeader(authorization: AuthorizationContract): string | null {
 
     switch (authorization.type) {
         case AuthorizationType.Bearer:
-            return `Authorization: Bearer ${resolveResolvableString(authorization.value)}`;
+            return `Authorization: Bearer ${authorization.value.resolved}`;
 
         case AuthorizationType.Basic:
             return buildBasicAuthHeader(authorization.value);
@@ -199,7 +194,7 @@ function buildBasicAuthHeader(authValue: {
 }): string | null {
     // btoa() encodes username:password string to Base64 for HTTP Basic Authentication
     const credentials = btoa(
-        `${resolveResolvableString(authValue.username)}:${resolveResolvableString(authValue.password)}`,
+        `${authValue.username.resolved}:${authValue.password.resolved}`,
     );
 
     return `Authorization: Basic ${credentials}`;
@@ -255,7 +250,7 @@ function transformRequestBodyToKeyValuePairs(
         );
     }
 
-    const resolvedBodyValue = resolveResolvableString(bodyValue);
+    const resolvedBodyValue = bodyValue.resolved;
 
     if (payloadType === RequestBodyTypeEnum.JSON) {
         return JSON.parse(resolvedBodyValue);
@@ -283,7 +278,7 @@ function convertBodyValueToRequestParts(
         return convertFormDataToCUrlFields(bodyValue);
     }
 
-    return [`-d '${resolveResolvableString(bodyValue)}'`];
+    return [`-d '${bodyValue.resolved}'`];
 }
 
 /**

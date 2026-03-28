@@ -113,7 +113,7 @@ describe('useRequestStore', () => {
             const store = useRequestStore();
             const auth: AuthorizationContract = {
                 type: AuthorizationType.Bearer,
-                value: 'abc123',
+                value: { raw: 'abc123', resolved: 'abc123' },
             };
 
             // Act

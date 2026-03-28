@@ -1,5 +1,4 @@
 import type { ResolvableString } from '@/interfaces/common/resolvable';
-import { rawResolvableString } from '@/utils/request';
 import { computed, type ComputedRef, type Ref } from 'vue';
 
 /**
@@ -12,7 +11,7 @@ export function useRouteParameterParsing(
     hasParameters: ComputedRef<boolean>;
 } {
     const parameters = computed(() => {
-        const url = rawResolvableString(endpoint.value);
+        const url = endpoint.value.raw;
 
         if (!url) {
             return [];

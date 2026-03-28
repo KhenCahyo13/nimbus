@@ -20,7 +20,6 @@ import HistoryItem from '@/components/domain/Client/Response/ResponseStatus/Hist
 import { type RequestLog } from '@/interfaces/history/logs';
 import { type Response } from '@/interfaces/http';
 import { useRequestsHistoryStore, useRequestStore } from '@/stores';
-import { rawResolvableString } from '@/utils/request';
 import { cn } from '@/utils/ui';
 import { useTimeAgo } from '@vueuse/core';
 import { HistoryIcon, Search, Trash2Icon } from 'lucide-vue-next';
@@ -117,7 +116,7 @@ const filteredLogs = computed(() => {
     const query = searchQuery.value.toLowerCase();
 
     return reversedLogs.value.filter(log =>
-        rawResolvableString(log.request.endpoint).toLowerCase().includes(query),
+        log.request.endpoint.raw.toLowerCase().includes(query),
     );
 });
 
@@ -226,16 +225,13 @@ watch(isOpen, async newValue => {
                 <template v-if="filteredLogs.length">
                     <template
                         v-for="(log, index) in filteredLogs"
-                        :key="
-                            rawResolvableString(log.request.endpoint) +
-                            log.response.timestamp
-                        "
+                        :key="log.request.endpoint.raw + log.response.timestamp"
                     >
                         <HistoryItem
                             :log="log"
                             :index="getOriginalIndex(reversedLogs.indexOf(log))"
                             data-testid="history-item"
-                            :data-endpoint="rawResolvableString(log.request.endpoint)"
+                            :data-endpoint="log.request.endpoint.raw"
                             :data-method="log.request.method"
                             @select="selectHistoryItem"
                         />

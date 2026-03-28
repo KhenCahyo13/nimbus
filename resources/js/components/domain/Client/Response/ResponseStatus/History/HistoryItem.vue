@@ -8,7 +8,6 @@ import StatusIndicator from '@/components/domain/Client/Response/ResponseStatus/
 import HttpVerbLabel from '@/components/domain/HttpVerbLabel/HttpVerbLabel.vue';
 import { type RequestLog } from '@/interfaces/history/logs';
 import { type Response, STATUS } from '@/interfaces/http';
-import { rawResolvableString } from '@/utils/request';
 import { useTimeAgo } from '@vueuse/core';
 import prettyBytes from 'pretty-bytes';
 import prettyMs from 'pretty-ms';
@@ -56,7 +55,7 @@ const timeToTimeAgo = (timestamp: number): string => {
             <div class="flex flex-1 flex-col gap-2">
                 <div
                     class="flex w-full justify-between gap-1 leading-tight"
-                    :title="rawResolvableString(props.log.request.endpoint)"
+                    :title="props.log.request.endpoint.raw"
                 >
                     <div class="flex-1 truncate">
                         <HttpVerbLabel
@@ -65,7 +64,7 @@ const timeToTimeAgo = (timestamp: number): string => {
                         />
 
                         <span class="ml-1 text-xs" data-testid="history-item-endpoint">
-                            {{ rawResolvableString(props.log.request.endpoint) }}
+                            {{ props.log.request.endpoint.raw }}
                         </span>
                     </div>
 

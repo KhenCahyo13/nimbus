@@ -4,10 +4,8 @@
  * @description Key-value editor for FormData request bodies.
  */
 import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/KeyValueParameters.vue';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
-import { rawResolvableString } from '@/utils/request';
 import { nextTick, ref, watch } from 'vue';
 
 /*
@@ -48,10 +46,7 @@ function convertParametersArrayToFormData(parameters: ParameterContract[]): Form
     const formData = new FormData();
 
     for (const parameter of parameters) {
-        formData.set(
-            parameter.key,
-            rawResolvableString(parameter.value as ResolvableString),
-        );
+        formData.set(parameter.key, parameter.value.raw);
     }
 
     return formData;
@@ -68,7 +63,7 @@ function convertFormDataToParametersArray(form: FormData): ParameterContract[] {
             parameters.push({
                 type: ParameterType.File,
                 key: key,
-                value: value.name,
+                value: { raw: value.name, resolved: value.name },
                 enabled: true,
             });
 
@@ -78,7 +73,7 @@ function convertFormDataToParametersArray(form: FormData): ParameterContract[] {
         parameters.push({
             type: ParameterType.Text,
             key: key,
-            value: value,
+            value: { raw: value, resolved: value },
             enabled: true,
         });
     });

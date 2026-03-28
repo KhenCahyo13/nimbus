@@ -66,7 +66,7 @@ describe('request-utils', () => {
 
         const request = {
             method: 'GET',
-            endpoint: 'users',
+            endpoint: { raw: 'users', resolved: 'users' },
             headers: [],
             queryParameters: [],
             payloadType: RequestBodyTypeEnum.EMPTY,
@@ -90,7 +90,7 @@ describe('request-utils', () => {
                     extractionErrors: null,
                 },
             },
-        } as PendingRequest;
+        } as unknown as PendingRequest;
 
         // Act & Assert (Success)
 

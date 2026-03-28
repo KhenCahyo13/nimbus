@@ -1,6 +1,5 @@
 import type { ParameterContract } from '@/interfaces';
 import { ParameterType } from '@/interfaces';
-import { resolveResolvableString } from '@/utils/common/resolvable';
 import {
     checkEnvVariable,
     EnvVariableCheckStatus,
@@ -13,7 +12,7 @@ import { describe, expect, it } from 'vitest';
 const createEnvVariablesMap = (variables: ParameterContract[]) => {
     const entries: [string, string][] = variables
         .filter(parameter => parameter.enabled)
-        .map(parameter => [parameter.key, resolveResolvableString(parameter.value)]);
+        .map(parameter => [parameter.key, parameter.value.resolved]);
 
     return new Map(entries);
 };

@@ -71,7 +71,10 @@ describe('useRequestExecutorStore', () => {
 
             expect(store.canExecute(null)).toBe(false);
             expect(
-                store.canExecute({ ...request, endpoint: '   ' } as PendingRequest),
+                store.canExecute({
+                    ...request,
+                    endpoint: { raw: '   ', resolved: '   ' },
+                } as PendingRequest),
             ).toBe(false);
         });
     });
