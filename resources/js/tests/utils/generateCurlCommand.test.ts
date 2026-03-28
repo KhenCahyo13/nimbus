@@ -64,10 +64,14 @@ const requestBase: PendingRequest = {
 
 describe('generateCurlCommand', () => {
     it('builds curl command with method, headers, and body [POST]', () => {
+        // Act
+
         const { command, hasSpecialAuth } = generateCurlCommand(
             requestBase,
             'https://api.example.com',
         );
+
+        // Assert
 
         expect(command).toContain('curl');
         expect(command).toContain('-X POST');
@@ -79,16 +83,22 @@ describe('generateCurlCommand', () => {
     });
 
     it('builds curl command with method, headers, and body [GET]', () => {
+        // Arrange
+
         const getRequestBase = Object.assign({}, requestBase);
 
         getRequestBase.method = 'GET';
 
         getRequestBase.body.GET = getRequestBase.body.POST;
 
+        // Act
+
         const { command, hasSpecialAuth } = generateCurlCommand(
             getRequestBase,
             'https://api.example.com',
         );
+
+        // Assert
 
         expect(command).toContain('curl');
         expect(command).toContain('"https://api.example.com/users?page=1&name=Jane"');
@@ -98,6 +108,8 @@ describe('generateCurlCommand', () => {
     });
 
     it('builds curl command with method, headers, and nested body [POST]', () => {
+        // Arrange
+
         const getRequestBase = Object.assign({}, requestBase);
 
         getRequestBase.body.POST = {
@@ -113,10 +125,14 @@ describe('generateCurlCommand', () => {
             },
         };
 
+        // Act
+
         const { command, hasSpecialAuth } = generateCurlCommand(
             getRequestBase,
             'https://api.example.com',
         );
+
+        // Assert
 
         expect(command).toContain('curl');
         expect(command).toContain('"https://api.example.com/users?page=1');
@@ -129,6 +145,8 @@ describe('generateCurlCommand', () => {
     });
 
     it('builds curl command with method, headers, and nested body [GET]', () => {
+        // Arrange
+
         const getRequestBase = Object.assign({}, requestBase);
 
         getRequestBase.method = 'GET';
@@ -146,10 +164,14 @@ describe('generateCurlCommand', () => {
             },
         };
 
+        // Act
+
         const { command, hasSpecialAuth } = generateCurlCommand(
             getRequestBase,
             'https://api.example.com',
         );
+
+        // Assert
 
         expect(command).toContain('curl');
         expect(command).toContain(
@@ -160,16 +182,58 @@ describe('generateCurlCommand', () => {
         expect(hasSpecialAuth).toBe(false);
     });
 
+    it('handles arrays and nested objects in query parameters [GET]', () => {
+        // Arrange
+
+        const getRequestBase = JSON.parse(JSON.stringify(requestBase));
+
+        getRequestBase.method = 'GET';
+        getRequestBase.endpoint = { raw: 'search', resolved: 'search' };
+
+        getRequestBase.body.GET = {
+            [RequestBodyTypeEnum.JSON]: {
+                raw: JSON.stringify({
+                    tags: ['vitest', 'nimbus'],
+                    filters: { status: 'active', types: ['admin', 'user'] },
+                }),
+                resolved: JSON.stringify({
+                    tags: ['vitest', 'nimbus'],
+                    filters: { status: 'active', types: ['admin', 'user'] },
+                }),
+            },
+        };
+
+        // Act
+
+        const { command } = generateCurlCommand(
+            getRequestBase,
+            'https://api.example.com',
+        );
+
+        // Assert
+
+        expect(command).toContain('curl');
+        expect(command).toContain(
+            '"https://api.example.com/search?page=1&tags%5B%5D=vitest&tags%5B%5D=nimbus&filters%5Bstatus%5D=active&filters%5Btypes%5D%5B%5D=admin&filters%5Btypes%5D%5B%5D=user"',
+        );
+    });
+
     it('flags special authorization types', () => {
+        // Arrange
+
         const request: PendingRequest = {
             ...requestBase,
             authorization: { type: AuthorizationType.Impersonate, value: 1 },
         } as PendingRequest;
 
+        // Act
+
         const { hasSpecialAuth } = generateCurlCommand(
             request,
             'https://api.example.com',
         );
+
+        // Assert
 
         expect(hasSpecialAuth).toBe(true);
     });
