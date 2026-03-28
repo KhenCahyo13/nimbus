@@ -12,11 +12,11 @@ describe('shareableLinks', () => {
 
             const pendingRequest: PendingRequest = {
                 method: 'POST',
-                endpoint: '/api/users',
+                endpoint: { raw: '/api/users', resolved: '/api/users' },
                 headers: [
                     {
                         key: 'Content-Type',
-                        value: 'application/json',
+                        value: { raw: 'application/json', resolved: 'application/json' },
                         type: ParameterType.Text,
                         enabled: true,
                     },
@@ -24,7 +24,7 @@ describe('shareableLinks', () => {
                 queryParameters: [
                     {
                         key: 'page',
-                        value: '1',
+                        value: { raw: '1', resolved: '1' },
                         type: ParameterType.Text,
                         enabled: true,
                     },
@@ -60,7 +60,7 @@ describe('shareableLinks', () => {
 
             const pendingRequest: PendingRequest = {
                 method: 'GET',
-                endpoint: '/api/health',
+                endpoint: { raw: '/api/health', resolved: '/api/health' },
                 headers: [],
                 queryParameters: [],
                 body: {},

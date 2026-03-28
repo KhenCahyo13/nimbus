@@ -1,10 +1,6 @@
 import { jsonLinter } from '@/components/domain/CodeEditor/jsonLinter';
-import {
-    createEnvironmentVariablesMap,
-    EnvironmentPlaceholderStatus,
-    type EnvironmentSubstitutionVariable,
-    getEnvironmentPlaceholderStatus,
-} from '@/utils/request';
+import { EnvVariableCheckStatus } from '@/utils/request';
+import { PLACEHOLDER_PATTERN } from '@/utils/request/environment-variable-resolver';
 import { json } from '@codemirror/lang-json';
 import { type Diagnostic, linter, lintGutter } from '@codemirror/lint';
 import { EditorState, type Extension } from '@codemirror/state';
@@ -43,18 +39,15 @@ export const commonExtensions = (readonly: boolean): Extension[] => {
 export const fallbackExtensions = (readonly: boolean): Extension[] =>
     commonExtensions(readonly);
 
-const placeholderPattern = /{{\s*([^{}]+?)\s*}}/g;
-
-export const environmentPlaceholderHighlightExtension = (
-    variables: EnvironmentSubstitutionVariable[],
+export const envVariablesCheck = (
+    getStatus: (value: string) => EnvVariableCheckStatus,
 ): Extension => {
     return linter(view => {
         const diagnostics: Diagnostic[] = [];
         const text = view.state.doc.toString();
-        const variablesMap = createEnvironmentVariablesMap(variables);
-        const source = 'environments-variables-replacement';
+        const source = 'env-variables-checks';
 
-        for (const match of text.matchAll(placeholderPattern)) {
+        for (const match of text.matchAll(PLACEHOLDER_PATTERN)) {
             const from = match.index;
             const value = match[0];
 
@@ -62,17 +55,13 @@ export const environmentPlaceholderHighlightExtension = (
                 continue;
             }
 
-            const status = getEnvironmentPlaceholderStatus(
-                value,
-                variables,
-                variablesMap,
-            );
+            const status = getStatus(value);
 
-            if (status === EnvironmentPlaceholderStatus.None) {
+            if (status === EnvVariableCheckStatus.None) {
                 continue;
             }
 
-            if (status === EnvironmentPlaceholderStatus.Resolved) {
+            if (status === EnvVariableCheckStatus.Resolved) {
                 diagnostics.push({
                     from,
                     to: from + value.length,
@@ -84,7 +73,7 @@ export const environmentPlaceholderHighlightExtension = (
                 continue;
             }
 
-            if (status === EnvironmentPlaceholderStatus.Empty) {
+            if (status === EnvVariableCheckStatus.Empty) {
                 diagnostics.push({
                     from,
                     to: from + value.length,

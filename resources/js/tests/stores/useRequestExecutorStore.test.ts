@@ -1,10 +1,9 @@
 import type { PendingRequest } from '@/interfaces';
-import { RequestBodyTypeEnum } from '@/interfaces';
-import { AuthorizationType } from '@/interfaces/generated';
 import { useRequestExecutorStore } from '@/stores/request/useRequestExecutorStore';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { reactive } from 'vue';
+import {createMockPendingRequest} from "@/tests/_utils/test-factories";
 
 /*
  * Fixtures.
@@ -13,24 +12,10 @@ import { reactive } from 'vue';
 const executeRequest = vi.fn();
 const cancelCurrentRequest = vi.fn();
 
-const requestUtilsMocks = vi.hoisted(() => ({
-    createRequestTimer: vi.fn(() => ({
-        stop: vi.fn(() => 1500),
-    })),
-    generateSuccessRequestLog: vi.fn(() => ({ type: 'success' })),
-    generateErrorRequestLog: vi.fn(() => ({ type: 'error' })),
-}));
-
 vi.mock('@/composables/request/useHttpClient', () => ({
     useHttpClient: () => ({
         executeRequest,
         cancelCurrentRequest,
-    }),
-}));
-
-vi.mock('@/composables/request/useResolvedRequest', () => ({
-    useResolvedRequest: () => ({
-        resolveRequest: (request: PendingRequest) => request,
     }),
 }));
 
@@ -47,28 +32,24 @@ vi.mock('@/stores', async importOriginal => {
     };
 });
 
-vi.mock('@/utils/request', () => requestUtilsMocks);
+const requestUtilsMocks = vi.hoisted(() => ({
+    createRequestTimer: vi.fn(() => ({
+        stop: vi.fn(() => 1500),
+    })),
+    generateSuccessRequestLog: vi.fn(() => ({ type: 'success' })),
+    generateErrorRequestLog: vi.fn(() => ({ type: 'error' })),
+}));
 
-const request: PendingRequest = {
-    method: 'GET',
-    endpoint: 'users',
-    headers: [],
-    body: {},
-    payloadType: RequestBodyTypeEnum.EMPTY,
-    schema: { shape: {}, extractionErrors: null },
-    queryParameters: [],
-    authorization: { type: AuthorizationType.None },
-    supportedRoutes: [],
-    routeDefinition: {
-        method: 'GET',
-        endpoint: 'users',
-        shortEndpoint: 'users',
-        schema: { shape: {}, extractionErrors: null },
-    },
-    isProcessing: false,
-    wasExecuted: false,
-    durationInMs: 0,
-};
+vi.mock('@/utils/request', async importOriginal => {
+    const actual = await importOriginal<object>();
+
+    return {
+        ...actual,
+        ...requestUtilsMocks,
+    };
+});
+
+const request: PendingRequest = createMockPendingRequest();
 
 describe('useRequestExecutorStore', () => {
     beforeEach(() => {

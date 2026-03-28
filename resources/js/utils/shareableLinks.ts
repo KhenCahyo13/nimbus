@@ -4,9 +4,16 @@
  * Uses pako (gzip/deflate) for compression to keep URLs within browser limits.
  */
 
+import type { AuthorizationContract } from '@/interfaces';
 import type { RequestLog } from '@/interfaces/history/logs';
-import type { PendingRequest, Response } from '@/interfaces/http';
+import type {
+    PendingRequest,
+    RequestBodyTypeEnum,
+    ResolvableString,
+    Response,
+} from '@/interfaces/http';
 import type { ShareableLinkPayload } from '@/interfaces/share';
+import { resolveResolvableString } from '@/utils/request';
 import pako from 'pako';
 
 /**
@@ -26,21 +33,21 @@ export function encodeShareablePayload(
 ): string {
     const payload: ShareableLinkPayload = {
         method: pendingRequest.method,
-        endpoint: pendingRequest.endpoint,
+        endpoint: resolveResolvableString(pendingRequest.endpoint),
         headers: pendingRequest.headers.map(header => ({
             key: header.key,
-            value: header.value,
+            value: resolveResolvableString(header.value),
         })),
         queryParameters: pendingRequest.queryParameters.map(param => ({
             key: param.key,
-            value: param.value,
+            value: resolveResolvableString(param.value),
             type: param.type,
         })),
-        body: pendingRequest.body,
+        body: resolveBody(pendingRequest.body),
         payloadType: pendingRequest.payloadType,
         authorization: {
             type: pendingRequest.authorization.type,
-            value: pendingRequest.authorization.value,
+            value: buildAuthorizationValue(pendingRequest.authorization.value),
         },
         applicationKey,
     };
@@ -77,12 +84,8 @@ export function encodeShareablePayload(
 
     // Convert to base64 with URL-safe characters
     const base64 = btoa(String.fromCharCode.apply(null, Array.from(compressed)));
-    const urlSafeBase64 = base64
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
 
-    return urlSafeBase64;
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /**
@@ -93,4 +96,57 @@ export function buildShareableUrl(basePath: string, encodedPayload: string): str
     const cleanBasePath = basePath.startsWith('/') ? basePath : `/${basePath}`;
 
     return `${baseUrl}${cleanBasePath}?share=${encodedPayload}`;
+}
+
+function buildAuthorizationValue(value: AuthorizationContract['value']) {
+    if (typeof value === 'object' && 'username' in value) {
+        return {
+            username: resolveResolvableString(value.username),
+            password: resolveResolvableString(value.password),
+        };
+    }
+
+    if (typeof value !== 'object') {
+        return value;
+    }
+
+    return resolveResolvableString(value);
+}
+
+function resolveBody(body: {
+    [method: string]:
+        | { [_key in RequestBodyTypeEnum]?: FormData | ResolvableString | null }
+        | undefined;
+}) {
+    const resolvedBody: Record<
+        string,
+        Record<string, FormData | string | null | undefined> | undefined
+    > = {};
+
+    for (const [method, contents] of Object.entries(body)) {
+        if (!contents) {
+            resolvedBody[method] = undefined;
+
+            continue;
+        }
+
+        const methodBody: Record<string, FormData | string | null | undefined> = {};
+
+        for (const [type, value] of Object.entries(contents)) {
+            if (value instanceof FormData) {
+                methodBody[type] = value;
+
+                continue;
+            }
+
+            methodBody[type] =
+                value !== null && value !== undefined
+                    ? resolveResolvableString(value as ResolvableString)
+                    : value;
+        }
+
+        resolvedBody[method] = methodBody;
+    }
+
+    return resolvedBody;
 }

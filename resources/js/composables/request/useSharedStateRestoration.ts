@@ -1,6 +1,6 @@
-import type { AuthorizationContract } from '@/interfaces/auth/authorization';
+import type { AuthorizationContract } from '@/interfaces';
 import type { RequestLog } from '@/interfaces/history/logs';
-import type { Request, RequestBodyTypeEnum } from '@/interfaces/http';
+import type { Request, RequestBodyTypeEnum, ResolvableString } from '@/interfaces/http';
 import type { Response } from '@/interfaces/http/response';
 import type { RouteDefinition } from '@/interfaces/routes/routes';
 import type { ShareableLinkPayload, SharedState } from '@/interfaces/share';
@@ -40,7 +40,7 @@ export function useSharedStateRestoration(): UseSharedStateRestorationResult {
     ): ParameterContract[] {
         return headers.map(header => ({
             key: header.key,
-            value: String(header.value ?? ''),
+            value: String(header.value ?? '') as ResolvableString,
             type: ParameterType.Text,
             enabled: true,
         }));
@@ -54,7 +54,7 @@ export function useSharedStateRestoration(): UseSharedStateRestorationResult {
     ): ParameterContract[] {
         return queryParameters.map(param => ({
             key: param.key,
-            value: param.value,
+            value: param.value as ResolvableString,
             type: param.type === 'file' ? ParameterType.File : ParameterType.Text,
             enabled: true,
         }));

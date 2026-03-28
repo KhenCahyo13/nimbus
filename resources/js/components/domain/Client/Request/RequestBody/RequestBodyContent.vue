@@ -4,7 +4,7 @@
  * @description Dynamic content renderer for the request body based on the selected payload type.
  */
 import { AppScrollArea } from '@/components/base/scroll-area';
-import { RequestBodyTypeEnum } from '@/interfaces/http';
+import { RequestBodyTypeEnum, type ResolvableString } from '@/interfaces/http';
 import type { JSONSchema7 } from 'json-schema';
 import RequestBodyFormData from './RequestBodyFormData.vue';
 import RequestBodyFormNone from './RequestBodyFormNone.vue';
@@ -17,12 +17,12 @@ import RequestBodyPlainText from './RequestBodyPlainText.vue';
 
 export interface AppRequestBodyContentProps {
     payloadType: RequestBodyTypeEnum;
-    payload: FormData | string | null;
+    payload: FormData | ResolvableString | null;
     schema?: JSONSchema7;
 }
 
 export interface AppRequestBodyContentEmits {
-    (e: 'update:payload', value: FormData | string | null): void;
+    (e: 'update:payload', value: FormData | ResolvableString | null): void;
 }
 
 /*
@@ -37,7 +37,7 @@ const emit = defineEmits<AppRequestBodyContentEmits>();
  * Event Handlers.
  */
 
-const updatePayload = (value: FormData | string | null) => {
+const updatePayload = (value: FormData | ResolvableString | null) => {
     emit('update:payload', value);
 };
 </script>
@@ -46,7 +46,7 @@ const updatePayload = (value: FormData | string | null) => {
     <AppScrollArea class="min-h-0 w-full flex-1">
         <RequestBodyJson
             v-if="payloadType === RequestBodyTypeEnum.JSON"
-            :model-value="payload as string"
+            :model-value="payload as ResolvableString"
             :schema="schema"
             @update:model-value="updatePayload"
         />

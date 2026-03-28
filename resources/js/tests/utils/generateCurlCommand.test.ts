@@ -7,24 +7,27 @@ import { describe, expect, it } from 'vitest';
 
 const requestBase: PendingRequest = {
     method: 'POST',
-    endpoint: 'users',
+    endpoint: { raw: 'users', resolved: 'users' },
     headers: [
         {
             key: 'Authorization',
-            value: 'Bearer token',
+            value: { raw: 'Bearer token', resolved: 'Bearer token' },
             enabled: true,
             type: ParameterType.Text,
         },
         {
             key: 'Accept',
-            value: 'application/json',
+            value: { raw: 'application/json', resolved: 'application/json' },
             enabled: true,
             type: ParameterType.Text,
         },
     ],
     body: {
         POST: {
-            [RequestBodyTypeEnum.JSON]: JSON.stringify({ name: 'Jane' }),
+            [RequestBodyTypeEnum.JSON]: {
+                raw: JSON.stringify({ name: 'Jane' }),
+                resolved: JSON.stringify({ name: 'Jane' }),
+            },
         },
     },
     payloadType: RequestBodyTypeEnum.JSON,
@@ -33,9 +36,17 @@ const requestBase: PendingRequest = {
         extractionErrors: null,
     },
     queryParameters: [
-        { key: 'page', value: '1', enabled: true, type: ParameterType.Text },
+        {
+            key: 'page',
+            value: { raw: '1', resolved: '1' },
+            enabled: true,
+            type: ParameterType.Text,
+        },
     ],
-    authorization: { type: AuthorizationType.Bearer, value: 'token' },
+    authorization: {
+        type: AuthorizationType.Bearer,
+        value: { raw: 'token', resolved: 'token' },
+    },
     supportedRoutes: [],
     routeDefinition: {
         method: 'POST',
@@ -90,10 +101,16 @@ describe('generateCurlCommand', () => {
         const getRequestBase = Object.assign({}, requestBase);
 
         getRequestBase.body.POST = {
-            [RequestBodyTypeEnum.JSON]: JSON.stringify({
-                user: { firstName: 'Jane', lastName: 'Doe' },
-                username: 'foobar',
-            }),
+            [RequestBodyTypeEnum.JSON]: {
+                raw: JSON.stringify({
+                    user: { firstName: 'Jane', lastName: 'Doe' },
+                    username: 'foobar',
+                }),
+                resolved: JSON.stringify({
+                    user: { firstName: 'Jane', lastName: 'Doe' },
+                    username: 'foobar',
+                }),
+            },
         };
 
         const { command, hasSpecialAuth } = generateCurlCommand(
@@ -117,10 +134,16 @@ describe('generateCurlCommand', () => {
         getRequestBase.method = 'GET';
 
         getRequestBase.body.GET = {
-            [RequestBodyTypeEnum.JSON]: JSON.stringify({
-                user: { firstName: 'Jane', lastName: 'Doe' },
-                username: 'foobar',
-            }),
+            [RequestBodyTypeEnum.JSON]: {
+                raw: JSON.stringify({
+                    user: { firstName: 'Jane', lastName: 'Doe' },
+                    username: 'foobar',
+                }),
+                resolved: JSON.stringify({
+                    user: { firstName: 'Jane', lastName: 'Doe' },
+                    username: 'foobar',
+                }),
+            },
         };
 
         const { command, hasSpecialAuth } = generateCurlCommand(

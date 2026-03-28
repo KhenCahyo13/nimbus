@@ -1,4 +1,4 @@
-import type { PendingRequest, RequestHeader } from '@/interfaces/http';
+import type { PendingRequest, RequestHeader, ResolvableString } from '@/interfaces/http';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import { useRequestStore } from '@/stores';
 import {
@@ -12,13 +12,13 @@ import { type ComputedRef, type Ref, computed, onMounted, ref, watch } from 'vue
 
 export interface UseRequestBodyResult {
     payloadType: Ref<RequestBodyTypeEnum>;
-    payload: Ref<FormData | string | null>;
+    payload: Ref<FormData | ResolvableString | null>;
     pendingRequestData: ComputedRef<
         ReturnType<typeof useRequestStore>['pendingRequestData']
     >;
     supportsAutoFill: ComputedRef<boolean>;
     autofill: () => void;
-    generateCurrentPayload: () => FormData | string | null;
+    generateCurrentPayload: () => FormData | ResolvableString | null;
     initializePayloadTypeFromHeaders: () => void;
     types: TypeShape[];
 }
@@ -40,7 +40,7 @@ export function useRequestBody(): UseRequestBodyResult {
      */
 
     const payloadType = ref<RequestBodyTypeEnum>(RequestBodyTypeEnum.EMPTY);
-    const payload = ref<FormData | string | null>(null);
+    const payload = ref<FormData | ResolvableString | null>(null);
 
     /*
      * Computed.
@@ -65,7 +65,7 @@ export function useRequestBody(): UseRequestBodyResult {
      * Returns the memoized payload for the current method and type, or generates
      * a placeholder payload from the schema if none exists.
      */
-    const generateCurrentPayload = (): FormData | string | null => {
+    const generateCurrentPayload = (): FormData | ResolvableString | null => {
         if (!pendingRequestData.value) {
             return null;
         }
@@ -82,7 +82,7 @@ export function useRequestBody(): UseRequestBodyResult {
             (body as PendingRequest['body'])?.[method]?.[payloadType.value] ?? null;
 
         if (memoizedBody) {
-            return memoizedBody;
+            return memoizedBody as FormData | ResolvableString | null;
         }
 
         // If we don't have the value memoized, we make up a new placeholder initial state.
@@ -115,7 +115,15 @@ export function useRequestBody(): UseRequestBodyResult {
         }
 
         const matchingTypeFromContentType: TypeShape | undefined = types.find(
-            type => type.mimeType === currentContentType.value,
+            function (type) {
+                const currentType =
+                    typeof currentContentType.value === 'object' &&
+                    currentContentType.value !== null
+                        ? (currentContentType.value?.resolved ?? currentContentType.value)
+                        : currentContentType.value;
+
+                return type.mimeType === currentType;
+            },
         );
 
         if (!matchingTypeFromContentType) {

@@ -1,18 +1,17 @@
 import { type ParameterContract, ParameterType } from '@/interfaces/ui';
+import { resolveResolvableString } from '@/utils/request';
 import { defineStore } from 'pinia';
-import { useId } from 'reka-ui';
+import type { ComputedRef, Ref } from 'vue';
 import { computed, onMounted, ref } from 'vue';
 
 /*
  * Types & Interfaces.
  */
 
-export type EnvironmentVariable = ParameterContract;
-
 export type EnvironmentCollection = {
     id: string;
     name: string;
-    variables: EnvironmentVariable[];
+    variables: ParameterContract[];
 };
 
 /*
@@ -21,7 +20,7 @@ export type EnvironmentCollection = {
 
 function createDefaultCollection(index: number): EnvironmentCollection {
     return {
-        id: useId(),
+        id: crypto.randomUUID(),
         name: `Collection ${index}`,
         variables: [],
     };
@@ -32,12 +31,14 @@ function createDefaultCollection(index: number): EnvironmentCollection {
  */
 
 export const useEnvironmentVariablesStore = defineStore(
-    'environment-variables',
+    'environmentVariables',
     () => {
         /*
          * State.
          */
-        const collections = ref<EnvironmentCollection[]>([]);
+        const collections: Ref<EnvironmentCollection[]> = ref<EnvironmentCollection[]>(
+            [],
+        );
         const activeCollectionId = ref<string | null>(null);
         const nextVariableId = ref(0);
         const isRenamingActiveCollection = ref<boolean>(false);
@@ -52,7 +53,7 @@ export const useEnvironmentVariablesStore = defineStore(
             return nextVariableId.value;
         };
 
-        const createEmptyVariable = (): EnvironmentVariable => ({
+        const createEmptyCollectionVariable = (): ParameterContract => ({
             id: generateVariableId(),
             type: ParameterType.Text,
             key: '',
@@ -72,8 +73,17 @@ export const useEnvironmentVariablesStore = defineStore(
             );
         });
 
-        const variables = computed(() => {
-            return activeCollection.value?.variables ?? [];
+        const editableVariables = computed(() => activeCollection.value?.variables ?? []);
+
+        const variables: ComputedRef<Map<string, string>> = computed(() => {
+            const variables: [string, string][] = editableVariables.value
+                .filter(variable => variable.enabled && variable.key.trim() !== '')
+                .map((parameter: ParameterContract) => [
+                    parameter.key.trim(),
+                    resolveResolvableString(parameter.value),
+                ]);
+
+            return new Map(variables);
         });
 
         const hasCollections = computed(() => collections.value.length > 0);
@@ -88,7 +98,7 @@ export const useEnvironmentVariablesStore = defineStore(
 
         const addCollection = () => {
             const collection = createDefaultCollection(collections.value.length + 1);
-            collection.variables = [createEmptyVariable()];
+            collection.variables = [createEmptyCollectionVariable()];
 
             collections.value.push(collection);
             activeCollectionId.value = collection.id;
@@ -131,14 +141,14 @@ export const useEnvironmentVariablesStore = defineStore(
             completeRenaming();
         };
 
-        const updateVariables = (variables: EnvironmentVariable[]) => {
+        const updateVariables = (variables: ParameterContract[]) => {
             if (!activeCollection.value) {
                 return;
             }
 
             const normalizedVariables = variables.length
                 ? variables
-                : [createEmptyVariable()];
+                : [createEmptyCollectionVariable()];
 
             collections.value = collections.value.map(collection => {
                 if (collection.id !== activeCollection.value!.id) {
@@ -163,13 +173,14 @@ export const useEnvironmentVariablesStore = defineStore(
          */
 
         return {
-            // State (Exposed for reactivity in lists, but actions preferred for modification)
+            // State
             collections,
             activeCollectionId,
             isRenamingActiveCollection,
 
             // Getters
             activeCollection,
+            editableVariables,
             variables,
             hasCollections,
 

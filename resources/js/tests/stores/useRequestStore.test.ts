@@ -97,13 +97,14 @@ describe('useRequestStore', () => {
 
             // Act
 
-            store.updateRequestEndpoint('/api/posts');
+            store.updateRequestEndpoint({ raw: '/api/posts', resolved: '/api/posts' });
 
             // Assert
 
-            expect(mockTabsStore.updateRequestEndpoint).toHaveBeenCalledWith(
-                '/api/posts',
-            );
+            expect(mockTabsStore.updateRequestEndpoint).toHaveBeenCalledWith({
+                raw: '/api/posts',
+                resolved: '/api/posts',
+            });
         });
 
         it('should delegate updateAuthorization to builder store', () => {
@@ -131,7 +132,7 @@ describe('useRequestStore', () => {
 
             const mockRequestData = {
                 method: 'GET',
-                endpoint: 'api/users',
+                endpoint: { raw: 'api/users', resolved: 'api/users' },
             } as unknown as PendingRequest;
             mockTabsStore.pendingRequestData = mockRequestData;
             const store = useRequestStore();

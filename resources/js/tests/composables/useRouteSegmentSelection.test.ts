@@ -125,9 +125,6 @@ describe('useRouteSegmentSelection', () => {
             expect(mockInput.setSelectionRange).not.toHaveBeenCalled();
         });
 
-            expect(mockInput.setSelectionRange).toHaveBeenCalledWith(10, 14);
-        });
-
         it('selects a segment that was originally a variable even if braces are gone', async () => {
             // Arrange
 

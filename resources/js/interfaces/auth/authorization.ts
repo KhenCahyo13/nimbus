@@ -1,11 +1,15 @@
 import type { AuthorizationType } from '@/interfaces/generated';
+import { type ResolvableString } from '@/interfaces/http';
 
 /**
  * Base interface for all authorization contracts
  */
 interface AuthorizationContractBase {
     type: AuthorizationType;
-    value?: string | number | { username: string; password: string };
+    value?:
+        | ResolvableString
+        | number
+        | { username: ResolvableString; password: ResolvableString };
 }
 
 /**
@@ -20,7 +24,7 @@ export interface NoAuthorization extends AuthorizationContractBase {
  */
 export interface BearerAuthorization extends AuthorizationContractBase {
     type: AuthorizationType.Bearer;
-    value: string;
+    value: ResolvableString;
 }
 
 /**
@@ -29,8 +33,8 @@ export interface BearerAuthorization extends AuthorizationContractBase {
 export interface BasicAuthorization extends AuthorizationContractBase {
     type: AuthorizationType.Basic;
     value: {
-        username: string;
-        password: string;
+        username: ResolvableString;
+        password: ResolvableString;
     };
 }
 

@@ -4,12 +4,10 @@
  * @description Key-value editor for FormData request bodies.
  */
 import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/KeyValueParameters.vue';
+import type { ResolvableString } from '@/interfaces/http';
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
-import {
-    getValueInputPlaceholder,
-    getValueInputStatus,
-} from '@/utils/ui/environment-variable';
+import { rawResolvableString } from '@/utils/request';
 import { nextTick, ref, watch } from 'vue';
 
 /*
@@ -50,19 +48,10 @@ function convertParametersArrayToFormData(parameters: ParameterContract[]): Form
     const formData = new FormData();
 
     for (const parameter of parameters) {
-        if (parameter.value === null) {
-            formData.set(parameter.key, '');
-
-            continue;
-        }
-
-        if ((parameter.value as unknown) instanceof Blob) {
-            formData.set(parameter.key, parameter.value);
-
-            continue;
-        }
-
-        formData.set(parameter.key, String(parameter.value));
+        formData.set(
+            parameter.key,
+            rawResolvableString(parameter.value as ResolvableString),
+        );
     }
 
     return formData;
@@ -137,8 +126,6 @@ watch(
     <KeyValueParametersBuilder
         :model-value="payload"
         :free-form-types="true"
-        :get-value-input-status-using="getValueInputStatus"
-        :get-value-input-placeholder-using="getValueInputPlaceholder"
         @update:parameters="handlePayloadUpdate"
     />
 </template>

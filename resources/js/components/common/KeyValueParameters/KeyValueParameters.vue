@@ -15,11 +15,10 @@ import {
 } from '@/components/base/select';
 import { AppSwitch } from '@/components/base/switch';
 import { AppTooltipWrapper } from '@/components/base/tooltip';
-import { EnvironmentVariablePlaceholderIndicator } from '@/components/common/EnvironmentVariablePlaceholderIndicator';
+import EnvironmentAwareInput from '@/components/common/EnvironmentAwareInput.vue';
 import { useKeyValueParameters } from '@/composables/ui/useKeyValueParameters';
 import { type ParameterContract } from '@/interfaces/ui';
 import { useValueGeneratorStore } from '@/stores';
-import { EnvironmentPlaceholderStatus } from '@/utils/request';
 import { cn } from '@/utils/ui';
 import {
     EyeClosedIcon,
@@ -38,12 +37,6 @@ export interface AppKeyValueParametersProps {
     modelValue?: ParameterContract[];
     freeFormTypes?: boolean;
     class?: HTMLAttributes['class'];
-    getValueInputStatusUsing?: (
-        parameter: ParameterContract,
-    ) => EnvironmentPlaceholderStatus;
-    getValueInputPlaceholderUsing?: (
-        parameter: ParameterContract,
-    ) => { key: string; value: string } | null;
 }
 
 export interface AppKeyValueParametersEmits {
@@ -58,8 +51,6 @@ const props = withDefaults(defineProps<AppKeyValueParametersProps>(), {
     modelValue: () => [],
     freeFormTypes: false,
     class: undefined,
-    getValueInputStatusUsing: undefined,
-    getValueInputPlaceholderUsing: undefined,
 });
 
 const emit = defineEmits<AppKeyValueParametersEmits>();
@@ -135,17 +126,6 @@ const handleGeneratorClick = () => {
 
 const handleDeleteParameter = (index: number) => {
     triggerParameterDeletion(index);
-};
-
-const getValueInputClass = (parameter: ParameterContract) => {
-    const status =
-        props.getValueInputStatusUsing?.(parameter) ?? EnvironmentPlaceholderStatus.None;
-
-    return {
-        'text-destructive': status === EnvironmentPlaceholderStatus.Missing,
-        'text-warning': status === EnvironmentPlaceholderStatus.Empty,
-        'text-primary': status === EnvironmentPlaceholderStatus.Resolved,
-    };
 };
 </script>
 <template>
@@ -240,39 +220,18 @@ const getValueInputClass = (parameter: ParameterContract) => {
                     />
 
                     <!-- Value Input -->
-                    <EnvironmentVariablePlaceholderIndicator
-                        v-slot="{ onMouseenter, onMouseleave }"
-                        :align-offset="5"
-                        :status="
-                            props.getValueInputStatusUsing?.(parameter) ??
-                            EnvironmentPlaceholderStatus.None
-                        "
-                        :variable-key="
-                            props.getValueInputPlaceholderUsing?.(parameter)?.key
-                        "
-                        :variable-value="
-                            props.getValueInputPlaceholderUsing?.(parameter)?.value
-                        "
-                    >
-                        <AppInput
-                            v-model="parameter.value"
-                            placeholder="Value"
-                            :class="
-                                cn(
-                                    'pl-panel h-full flex-1 rounded-none border-0 border-r shadow-none focus:ring-0 focus-visible:ring-0',
-                                    getValueInputClass(parameter),
-                                )
-                            "
-                            :disabled="!parameter.enabled"
-                            name="kv-value"
-                            data-testid="kv-value"
-                            autocomplete="off"
-                            @mouseenter="() => parameter.enabled && onMouseenter()"
-                            @mouseleave="() => parameter.enabled && onMouseleave()"
-                            @focus="handleValueInputFocus(index, $event.target)"
-                            @blur="handleValueInputBlur"
-                        />
-                    </EnvironmentVariablePlaceholderIndicator>
+                    <EnvironmentAwareInput
+                        v-model="parameter.value"
+                        placeholder="Value"
+                        :disabled="!parameter.enabled"
+                        name="kv-value"
+                        data-testid="kv-value"
+                        autocomplete="off"
+                        class="border-r"
+                        input-class="pl-panel h-full flex-1 rounded-none border-0 border-r shadow-none focus:ring-0 focus-visible:ring-0"
+                        @focus="handleValueInputFocus(index, $event.target)"
+                        @blur="handleValueInputBlur"
+                    />
                 </div>
 
                 <!-- Enable/Disable Toggle -->

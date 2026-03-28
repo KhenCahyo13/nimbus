@@ -1,14 +1,6 @@
-import type { ParameterContract } from '@/interfaces/ui';
-
-export interface EnvironmentSubstitutionVariable {
-    key: string;
-    value: string;
-    enabled: boolean;
-}
-
 export type EnvironmentVariablesMap = Map<string, string>;
 
-export enum EnvironmentPlaceholderStatus {
+export enum EnvVariableCheckStatus {
     None = 'none',
     Missing = 'missing',
     Empty = 'empty',
@@ -19,17 +11,7 @@ export enum EnvironmentPlaceholderStatus {
  * Pattern used to identify environment variable placeholders in strings.
  * Matches double-brace syntax: {{variable_name}}
  */
-const PLACEHOLDER_PATTERN = /{{\s*([^{}]+?)\s*}}/g;
-
-export const createEnvironmentVariablesMap = (
-    variables: EnvironmentSubstitutionVariable[],
-): EnvironmentVariablesMap => {
-    return new Map(
-        variables
-            .filter(variable => variable.enabled && variable.key.trim() !== '')
-            .map(variable => [variable.key.trim(), variable.value]),
-    );
-};
+export const PLACEHOLDER_PATTERN = /{{\s*([^{}]+?)\s*}}/g;
 
 const extractPlaceholderKeys = (value: string): string[] => {
     return Array.from(value.matchAll(PLACEHOLDER_PATTERN)).map(match =>
@@ -37,135 +19,85 @@ const extractPlaceholderKeys = (value: string): string[] => {
     );
 };
 
-export const getEnvironmentPlaceholderStatus = (
+/**
+ * Check the state of a particular value within the active variables.
+ */
+export const checkEnvVariable = (
     value: string,
-    variables: EnvironmentSubstitutionVariable[],
-    variablesMap: EnvironmentVariablesMap | null = null,
-): EnvironmentPlaceholderStatus => {
+    variablesMap: EnvironmentVariablesMap,
+): EnvVariableCheckStatus => {
     const keys = extractPlaceholderKeys(value);
 
     if (keys.length === 0) {
-        return EnvironmentPlaceholderStatus.None;
+        return EnvVariableCheckStatus.None;
     }
 
-    const currentVariablesMap = variablesMap ?? createEnvironmentVariablesMap(variables);
-
     for (const key of keys) {
-        if (!currentVariablesMap.has(key)) {
-            return EnvironmentPlaceholderStatus.Missing;
+        if (!variablesMap.has(key)) {
+            return EnvVariableCheckStatus.Missing;
         }
     }
 
     for (const key of keys) {
-        if ((currentVariablesMap.get(key) ?? '') === '') {
-            return EnvironmentPlaceholderStatus.Empty;
+        if ((variablesMap.get(key) ?? '') === '') {
+            return EnvVariableCheckStatus.Empty;
         }
     }
 
-    return EnvironmentPlaceholderStatus.Resolved;
+    return EnvVariableCheckStatus.Resolved;
 };
 
-export const resolveEnvironmentVariables = (
+/**
+ * Replaces all env variable keys in a string with their corresponding values from the map.
+ */
+export const replaceEnvVariablesInString = (
     value: string,
-    variables: EnvironmentSubstitutionVariable[],
-    variablesMap: EnvironmentVariablesMap | null = null,
+    variablesMap: EnvironmentVariablesMap,
 ): string => {
     if (!value.includes('{{')) {
         return value;
     }
 
-    const currentVariablesMap = variablesMap ?? createEnvironmentVariablesMap(variables);
-
     return value.replace(PLACEHOLDER_PATTERN, (match, key) => {
         const normalizedKey = String(key).trim();
 
-        return currentVariablesMap.get(normalizedKey) ?? match;
+        return variablesMap.get(normalizedKey) ?? match;
     });
-};
-
-export const resolveEnvironmentVariablesInParameters = (
-    parameters: ParameterContract[],
-    variables: EnvironmentSubstitutionVariable[],
-): ParameterContract[] => {
-    const variablesMap = createEnvironmentVariablesMap(variables);
-
-    return parameters.map(parameter => ({
-        ...parameter,
-        value: resolveEnvironmentVariables(parameter.value, variables, variablesMap),
-    }));
-};
-
-export const resolveEnvironmentVariablesInBody = (
-    body: FormData | string | null,
-    variables: EnvironmentSubstitutionVariable[],
-): FormData | string | null => {
-    const variablesMap = createEnvironmentVariablesMap(variables);
-
-    if (typeof body === 'string') {
-        return resolveEnvironmentVariables(body, variables, variablesMap);
-    }
-
-    if (!(body instanceof FormData)) {
-        return body;
-    }
-
-    const resolved = new FormData();
-
-    body.forEach((value, key) => {
-        if (typeof value === 'string') {
-            resolved.append(
-                key,
-                resolveEnvironmentVariables(value, variables, variablesMap),
-            );
-
-            return;
-        }
-
-        resolved.append(key, value);
-    });
-
-    return resolved;
 };
 
 /**
- * Gets the resolved placeholder data (key and value) for a given placeholder string.
+ * Gets the metadata (key and current value) for the first placeholder found in a string.
  */
-export const getResolvedPlaceholder = (
+export const getEnvKeyValue = (
     value: string,
-    variables: EnvironmentSubstitutionVariable[],
-    variablesMap: EnvironmentVariablesMap | null = null,
-): { key: string; value: string } | null => {
+    variablesMap: EnvironmentVariablesMap,
+): string | null => {
     const keys = extractPlaceholderKeys(value);
 
     if (keys.length === 0) {
         return null;
     }
 
-    const currentVariablesMap = variablesMap ?? createEnvironmentVariablesMap(variables);
-
-    return {
-        key: keys[0],
-        value: currentVariablesMap.get(keys[0]) ?? '',
-    };
+    return variablesMap.get(keys[0]) ?? '';
 };
 
 /**
- * Represents a segment of an endpoint URL, identifying
+ * Represents a segment of a string, identifying
  * whether it is a reactive environment placeholder or static text.
  */
-export interface EndpointSegment {
+export interface StringSegment {
     text: string;
-    isPlaceholder: boolean;
+    isEnvVariable: boolean;
+    status?: EnvVariableCheckStatus;
+    resolvedValue?: string | null;
 }
 
 /**
- * Parses an endpoint URL into logical segments for rich-text rendering.
- *
- * It extracts all environment variable placeholders ({{...}}) and returns
- * them as distinct segments interleaved with standard text segments.
+ * Parses a string into logical segments (text or placeholder).
  */
-export const getEndpointSegments = (value: string): EndpointSegment[] => {
-    const segments: EndpointSegment[] = [];
+export const getStringSegments = (value: string): StringSegment[] => {
+    const segments: StringSegment[] = [];
+
     let lastIndex = 0;
 
     const matches = Array.from(value.matchAll(PLACEHOLDER_PATTERN));
@@ -176,13 +108,13 @@ export const getEndpointSegments = (value: string): EndpointSegment[] => {
         if (index > lastIndex) {
             segments.push({
                 text: value.substring(lastIndex, index),
-                isPlaceholder: false,
+                isEnvVariable: false,
             });
         }
 
         segments.push({
             text: match[0],
-            isPlaceholder: true,
+            isEnvVariable: true,
         });
 
         lastIndex = index + match[0].length;
@@ -191,28 +123,9 @@ export const getEndpointSegments = (value: string): EndpointSegment[] => {
     if (lastIndex < value.length) {
         segments.push({
             text: value.substring(lastIndex),
-            isPlaceholder: false,
+            isEnvVariable: false,
         });
     }
 
     return segments;
-};
-
-export const getPlaceholderStatus = (
-    key: string,
-    variables: EnvironmentSubstitutionVariable[],
-    variablesMap: EnvironmentVariablesMap | null = null,
-): EnvironmentPlaceholderStatus => {
-    const currentVariablesMap = variablesMap ?? createEnvironmentVariablesMap(variables);
-    const normalizedKey = key.replace(/[{}]/g, '').trim();
-
-    if (!currentVariablesMap.has(normalizedKey)) {
-        return EnvironmentPlaceholderStatus.Missing;
-    }
-
-    if ((currentVariablesMap.get(normalizedKey) ?? '') === '') {
-        return EnvironmentPlaceholderStatus.Empty;
-    }
-
-    return EnvironmentPlaceholderStatus.Resolved;
 };

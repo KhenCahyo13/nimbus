@@ -1,20 +1,24 @@
-import { computed, type ComputedRef } from 'vue';
+import type { ResolvableString } from '@/interfaces/http';
+import { rawResolvableString } from '@/utils/request';
+import { computed, type ComputedRef, type Ref } from 'vue';
 
 /**
  * Composable for detecting dynamic placeholders in a route endpoint URL.
  */
-export function useRoutePlaceholderDetection(endpoint: ComputedRef<string>): {
+export function useRoutePlaceholderDetection(
+    endpoint: Ref<ResolvableString> | ComputedRef<ResolvableString>,
+): {
     placeholders: ComputedRef<string[]>;
     hasPlaceholders: ComputedRef<boolean>;
 } {
     const placeholders = computed(() => {
-        const url = endpoint.value;
+        const url = rawResolvableString(endpoint.value);
 
         if (!url) {
             return [];
         }
 
-        const matches = Array.from(url.matchAll(/\{([a-zA-Z0-9_-]+)\}/g));
+        const matches = Array.from(url.matchAll(/(?<!\{)\{([a-zA-Z0-9_-]+)\}(?!\})/g));
 
         return matches.map(match => match[1]);
     });

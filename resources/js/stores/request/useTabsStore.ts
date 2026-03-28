@@ -1,10 +1,10 @@
-import { useResolvedRequest } from '@/composables/request/useResolvedRequest';
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
 import { AuthorizationType } from '@/interfaces/generated';
 import type { RequestLog } from '@/interfaces/history/logs';
 import type {
     GeneratorType,
     PendingRequest,
+    ResolvableString,
     SourceGlobalHeaders,
 } from '@/interfaces/http';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
@@ -14,7 +14,11 @@ import type { ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui';
 import type { Tab } from '@/interfaces/ui/tabs';
 import { useConfigStore, useSettingsStore, useValueGeneratorStore } from '@/stores';
-import { buildRequestUrl, getDefaultPayloadTypeForRoute } from '@/utils/request';
+import {
+    buildRequestUrl,
+    getDefaultPayloadTypeForRoute,
+    resolveResolvableString,
+} from '@/utils/request';
 import { generateValueFromType } from '@/utils/value-generator/generateValueFromType';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
@@ -32,7 +36,6 @@ export const useTabsStore = defineStore(
         const settingsStore = useSettingsStore();
         const configStore = useConfigStore();
         const valueGeneratorStore = useValueGeneratorStore();
-        const { resolveRequest } = useResolvedRequest();
 
         /*
          * State.
@@ -321,7 +324,7 @@ export const useTabsStore = defineStore(
             activeRequest.value.schema = targetRoute.schema;
         }
 
-        function updateRequestEndpoint(endpoint: string) {
+        function updateRequestEndpoint(endpoint: ResolvableString) {
             if (activeRequest.value) {
                 activeRequest.value.endpoint = endpoint;
             }
@@ -376,7 +379,7 @@ export const useTabsStore = defineStore(
             currentBody: PendingRequest['body'],
             method: string,
             payloadType: RequestBodyTypeEnum,
-            newBodyContent: FormData | string | null,
+            newBodyContent: FormData | ResolvableString | null,
         ): PendingRequest['body'] => {
             const body = { ...currentBody };
             const methodBody = body[method] ?? {};
@@ -398,14 +401,14 @@ export const useTabsStore = defineStore(
 
             return {
                 method: payload.method.toUpperCase(),
-                endpoint: payload.endpoint,
+                endpoint: payload.endpoint as ResolvableString,
                 headers: payload.headers.map(
                     (header: {
                         key: string;
                         value: string | number | boolean | null;
                     }) => ({
                         key: header.key,
-                        value: String(header.value ?? ''),
+                        value: String(header.value ?? '') as ResolvableString,
                         type: ParameterType.Text,
                         enabled: true,
                     }),
@@ -419,7 +422,7 @@ export const useTabsStore = defineStore(
                 queryParameters: payload.queryParameters.map(
                     (param: { key: string; value: string; type?: 'text' | 'file' }) => ({
                         key: param.key,
-                        value: param.value,
+                        value: param.value as ResolvableString,
                         type:
                             param.type === 'file'
                                 ? ParameterType.File
@@ -429,18 +432,19 @@ export const useTabsStore = defineStore(
                 ),
                 authorization: {
                     type: payload.authorization.type as AuthorizationType,
-                    value: payload.authorization.value,
+                    value: payload.authorization.value as AuthorizationContract['value'],
                 } as AuthorizationContract,
                 supportedRoutes: [],
                 routeDefinition: {
-                    endpoint: payload.endpoint,
+                    endpoint: payload.endpoint as string,
                     method: payload.method.toUpperCase(),
                     schema: {
                         shape: {},
                         extractionErrors: null,
                     },
-                    shortEndpoint: payload.endpoint,
+                    shortEndpoint: payload.endpoint as string,
                 },
+
                 isProcessing: false,
                 wasExecuted,
                 durationInMs: payload.response?.durationInMs ?? 0,
@@ -549,14 +553,11 @@ export const useTabsStore = defineStore(
          * Builds complete request URL with query parameters.
          */
         const getRequestUrl = (request: PendingRequest): string => {
-            const resolvedRequest = resolveRequest(request);
-
             return buildRequestUrl(
                 configStore.apiUrl,
-                resolvedRequest.endpoint,
-                resolvedRequest.queryParameters.filter(
-                    (parameter: ParameterContract) =>
-                        parameter.enabled && parameter.key.trim() !== '',
+                resolveResolvableString(request.endpoint),
+                request.queryParameters.filter(
+                    (parameter: ParameterContract) => parameter.enabled,
                 ),
             );
         };

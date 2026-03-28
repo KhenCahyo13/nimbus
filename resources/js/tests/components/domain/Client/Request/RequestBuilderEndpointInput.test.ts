@@ -1,3 +1,4 @@
+import EnvironmentAwareInput from '@/components/common/EnvironmentAwareInput.vue';
 import RequestBuilderEndpointInput from '@/components/domain/Client/Request/RequestBuilderEndpointInput.vue';
 import type { PendingRequest } from '@/interfaces/http';
 import type { VueWrapper } from '@vue/test-utils';
@@ -51,24 +52,27 @@ describe('RequestBuilderEndpointInput', () => {
         vi.clearAllMocks();
 
         mockRequestStore.pendingRequestData = {
-            endpoint: '/users/1',
+            endpoint: { raw: '/users/1', resolved: '/users/1' },
             isProcessing: false,
         } as unknown as PendingRequest;
     });
 
     it('renders the current endpoint', () => {
         const wrapper = createWrapper();
-        const input = wrapper.find('[data-testid="endpoint-input"]');
+        const input = wrapper.find('input');
         expect((input.element as HTMLInputElement).value).toBe('/users/1');
     });
 
     it('updates the endpoint when input changes', async () => {
         const wrapper = createWrapper();
-        const input = wrapper.find('[data-testid="endpoint-input"]');
+        const input = wrapper.find('input');
 
         await input.setValue('/users/2');
 
-        expect(mockRequestStore.updateRequestEndpoint).toHaveBeenCalledWith('/users/2');
+        expect(mockRequestStore.updateRequestEndpoint).toHaveBeenCalledWith({
+            raw: '/users/2',
+            resolved: '/users/2',
+        });
     });
 
     it('executes the request when the send button is clicked', async () => {
@@ -93,7 +97,7 @@ describe('RequestBuilderEndpointInput', () => {
 
     it('does not execute the request if the endpoint has placeholders', async () => {
         mockRequestStore.pendingRequestData = {
-            endpoint: '/users/{id}',
+            endpoint: { raw: '/users/{id}', resolved: '/users/{id}' },
             isProcessing: false,
         } as unknown as PendingRequest;
 
@@ -105,15 +109,29 @@ describe('RequestBuilderEndpointInput', () => {
         expect(mockRequestStore.executeCurrentRequest).not.toHaveBeenCalled();
     });
 
+    it('executes the request even if the endpoint has environment variables', async () => {
+        mockRequestStore.pendingRequestData = {
+            endpoint: { raw: '/{{collection}}/users', resolved: '/my-collection/users' },
+            isProcessing: false,
+        } as unknown as PendingRequest;
+
+        const wrapper = createWrapper();
+        const button = wrapper.find('button');
+
+        await button.trigger('click');
+
+        expect(mockRequestStore.executeCurrentRequest).toHaveBeenCalled();
+    });
+
     it('syncs the mirror scroll position when the input is scrolled', async () => {
         const wrapper = createWrapper();
-        const input = wrapper.find('[data-testid="endpoint-input"]');
-        
-        // We need to set up the mirrorRef for the test
-        const mirror = wrapper.find({ ref: 'mirrorRef' });
-        
+        const input = wrapper.find('input');
+
+        const environmentAwareInput = wrapper.getComponent(EnvironmentAwareInput);
+        const mirror = environmentAwareInput.vm.mirrorRef as HTMLDivElement;
+
         // Mock scrollLeft behavior since it's not fully operational in JSDOM
-        Object.defineProperty(mirror.element, 'scrollLeft', {
+        Object.defineProperty(mirror, 'scrollLeft', {
             value: 0,
             writable: true,
         });
@@ -126,38 +144,59 @@ describe('RequestBuilderEndpointInput', () => {
 
         await input.trigger('scroll');
 
-        expect(mirror.element.scrollLeft).toBe(100);
+        expect(mirror.scrollLeft).toBe(100);
     });
 
     it('detects the hovered segment via elementFromPoint', async () => {
         const wrapper = createWrapper();
-        const input = wrapper.find('[data-testid="endpoint-input"]');
-        
+        const input = wrapper.find('input');
+
         // Mock elementFromPoint
         const mockSpan = document.createElement('span');
         mockSpan.setAttribute('data-segment-index', '2');
-        
+
         // Add closest mock for JSDOM
         mockSpan.closest = vi.fn().mockReturnValue(mockSpan);
-        
-        vi.spyOn(document, 'elementFromPoint').mockReturnValue(mockSpan);
+
+        Object.defineProperty(document, 'elementFromPoint', {
+            value: vi.fn().mockReturnValue(mockSpan),
+            configurable: true,
+        });
 
         await input.trigger('mousemove', {
             clientX: 10,
             clientY: 10,
         });
 
-        expect((wrapper.vm as any).activeIndicatorIndex).toBe(2);
+        const environmentAwareInput = wrapper.getComponent(EnvironmentAwareInput);
+        expect(
+            (
+                environmentAwareInput.vm as unknown as {
+                    activelyHoveredEnvVariableSegment: number | null;
+                }
+            ).activelyHoveredEnvVariableSegment,
+        ).toBe(2);
     });
 
     it('clears the active indicator on mouseleave', async () => {
         const wrapper = createWrapper();
-        const input = wrapper.find('[data-testid="endpoint-input"]');
-        
-        (wrapper.vm as any).activeIndicatorIndex = 1;
+        const input = wrapper.find('input');
+
+        const environmentAwareInput = wrapper.getComponent(EnvironmentAwareInput);
+        (
+            environmentAwareInput.vm as unknown as {
+                activelyHoveredEnvVariableSegment: number | null;
+            }
+        ).activelyHoveredEnvVariableSegment = 1;
 
         await input.trigger('mouseleave');
 
-        expect((wrapper.vm as any).activeIndicatorIndex).toBe(null);
+        expect(
+            (
+                environmentAwareInput.vm as unknown as {
+                    activelyHoveredEnvVariableSegment: number | null;
+                }
+            ).activelyHoveredEnvVariableSegment,
+        ).toBe(null);
     });
 });

@@ -10,11 +10,13 @@ import { computed, nextTick, ref } from 'vue';
  * Fixtures.
  */
 
+import type { ResolvableString } from '@/interfaces/http';
+
 const parameters: Ref<
     Array<{
         id: string;
         key: string;
-        value: string;
+        value: ResolvableString;
         enabled: boolean;
         type: string;
     }>
@@ -45,6 +47,14 @@ vi.mock('@/composables/ui/useKeyValueParameters', () => ({
     }),
 }));
 
+const mockActiveVariables = ref([
+    {
+        key: 'resolvedKey',
+        value: { raw: 'someValue', resolved: 'someValue' },
+        enabled: true,
+    },
+]);
+
 vi.mock('@/stores', async importOriginal => {
     const actual = await importOriginal<object>();
 
@@ -54,6 +64,21 @@ vi.mock('@/stores', async importOriginal => {
             openCommand,
             closeCommand,
         }),
+        useEnvironmentVariablesStore: () => {
+            const variablesEntries: [string, string][] = mockActiveVariables.value
+                .filter(v => v.enabled)
+                .map(v => [
+                    v.key,
+                    typeof v.value === 'object' ? v.value.resolved : v.value,
+                ]);
+
+            return {
+                activeCollection: {
+                    variables: mockActiveVariables.value,
+                },
+                variables: new Map(variablesEntries),
+            };
+        },
     };
 });
 
@@ -83,14 +108,14 @@ describe('KeyValueParameters', () => {
             {
                 id: '1',
                 key: 'test-key',
-                value: 'test-value',
+                value: { raw: 'test-value', resolved: 'test-value' },
                 enabled: true,
                 type: 'text',
             },
             {
                 id: '2',
                 key: 'another-key',
-                value: 'another-value',
+                value: { raw: 'another-value', resolved: 'another-value' },
                 enabled: false,
                 type: 'text',
             },
@@ -139,20 +164,35 @@ describe('KeyValueParameters', () => {
             expect(wrapper.findAll('[data-testid="type-selector"]')).toHaveLength(2);
         });
 
-        it('applies value input classes provided by the parent resolver', () => {
+        it('applies correct status classes based on environment variable resolution', async () => {
             // Arrange
-
-            const wrapper = createWrapper({
-                props: {
-                    getValueInputStatusUsing: () => 'resolved',
+            parameters.value = [
+                {
+                    id: '1',
+                    key: 'key1',
+                    value: { raw: '{{resolvedKey}}', resolved: '{{resolvedKey}}' },
+                    enabled: true,
+                    type: 'text',
                 },
-            });
+                {
+                    id: '2',
+                    key: 'key2',
+                    value: { raw: '{{missingKey}}', resolved: '{{missingKey}}' },
+                    enabled: true,
+                    type: 'text',
+                },
+            ];
+
+            const wrapper = createWrapper();
+            await nextTick();
 
             // Assert
+            const rows = wrapper.findAll('[data-testid="parameter-row"]');
+            const row1Segment = rows[0].find('[data-segment-index]');
+            const row2Segment = rows[1].find('[data-segment-index]');
 
-            expect(wrapper.findAll('[data-testid="kv-value"]')[0].classes()).toContain(
-                'text-primary',
-            );
+            expect(row1Segment.classes()).toContain('text-primary'); // Resolved
+            expect(row2Segment.classes()).toContain('text-destructive'); // Missing
         });
     });
 
@@ -206,11 +246,12 @@ describe('KeyValueParameters', () => {
             // Arrange
 
             const wrapper = createWrapper();
-            const valueInputs = wrapper.findAll('[data-testid="kv-value"]');
+            const valueInputs = wrapper.findAll('input');
+            const valueInput = valueInputs[1]; // Index 1 is the value input
 
             // Act
 
-            await valueInputs[0].trigger('focus');
+            await valueInput.trigger('focus');
             await nextTick();
 
             const generatorButton = wrapper.find('[data-testid="generator-button"]');
@@ -218,14 +259,14 @@ describe('KeyValueParameters', () => {
 
             // Assert
 
-            expect(openCommand).toHaveBeenCalledWith(valueInputs[0].element);
+            expect(openCommand).toHaveBeenCalledWith(valueInput.element);
         });
 
         it('keeps generator open when blur moves into generator palette', async () => {
             // Arrange
 
             const wrapper = createWrapper();
-            const valueInput = wrapper.findAll('[data-testid="kv-value"]')[0];
+            const valueInput = wrapper.find('input[name="kv-value"]');
 
             // Act
 

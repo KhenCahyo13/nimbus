@@ -1,13 +1,19 @@
 import { httpClientConfig } from '@/config';
-import type { ParameterContract, RequestHeader } from '@/interfaces';
+import type {
+    AuthorizationContract,
+    ParameterContract,
+    RequestHeader,
+} from '@/interfaces';
 import type {
     HttpHeaders,
+    PendingRequest,
     RelayProxyResponse,
-    Request,
     Response,
 } from '@/interfaces/http';
 import { useConfigStore } from '@/stores';
+import { buildRequestUrl } from '@/utils';
 import { convertPayloadToFormData, getStatusGroup } from '@/utils/http';
+import { resolveResolvableString } from '@/utils/request';
 import { generateContentTypeHeader } from '@/utils/request/content-type-header-generator';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
@@ -19,9 +25,9 @@ export interface RequestResult {
 }
 
 export interface UseHttpClientResult {
-    executeRequest: (request: Request) => Promise<RequestResult | null>;
+    executeRequest: (request: PendingRequest) => Promise<RequestResult | null>;
     cancelCurrentRequest: () => void;
-    buildRequestUrl: (request: Request) => string;
+    buildUrlFromRequest: (request: PendingRequest) => string;
     isExecuting: DeepReadonly<Ref<boolean>>;
 }
 
@@ -46,28 +52,75 @@ export function useHttpClient(): UseHttpClientResult {
      * Utilities.
      */
 
-    const buildRequestUrl = (request: Request): string => {
-        const baseUrl = configStore.apiUrl;
-
+    const buildUrlFromRequest = (request: PendingRequest): string => {
         // Remove leading slashes to prevent double slashes in final URL
-        const endpoint = request.endpoint.replace(/^\/+/, '');
+        const endpoint = resolveResolvableString(request.endpoint).replace(/^\/+/, '');
 
-        const url = new URL(`${baseUrl}/${endpoint}`);
-
-        // Only append enabled parameters with non-empty keys to avoid malformed URLs
-        request.queryParameters
-            .filter(
-                (parameter: ParameterContract) =>
-                    parameter.enabled && parameter.key.trim(),
-            )
-            .forEach((parameter: ParameterContract) => {
-                url.searchParams.append(parameter.key, parameter.value);
-            });
-
-        return url.toString();
+        return buildRequestUrl(
+            configStore.apiUrl,
+            endpoint,
+            request.queryParameters.filter(
+                (parameter: ParameterContract) => parameter.enabled,
+            ),
+        );
     };
 
-    const createRelayPayload = (request: Request) => {
+    /**
+     * Body is memoized by method > payload type structure for better UX (keep-alive state).
+     */
+    const getMemoizedBody = (request: PendingRequest) => {
+        // First extraction: get body for the specific HTTP method (GET, POST, etc.)
+        const methodBodies = request.body[request.method] ?? null;
+
+        // Second extraction: get body for the specific payload type (JSON, FormData, etc.)
+        // This double extraction is necessary due to the nested memoization structure
+        const body = methodBodies ? (methodBodies[request.payloadType] ?? null) : null;
+
+        if (body instanceof FormData) {
+            return body;
+        }
+
+        if (body === null) {
+            return null;
+        }
+
+        return resolveResolvableString(body);
+    };
+
+    function buildRelayAuthorization(authorization: AuthorizationContract) {
+        if (!authorization.value) {
+            return {
+                type: authorization.type,
+            };
+        }
+
+        if (
+            typeof authorization.value === 'object' &&
+            'username' in authorization.value
+        ) {
+            return {
+                type: authorization.type,
+                value: {
+                    username: resolveResolvableString(authorization.value.username),
+                    password: resolveResolvableString(authorization.value.password),
+                },
+            };
+        }
+
+        if (typeof authorization.value === 'number') {
+            return {
+                type: authorization.type,
+                value: authorization.value,
+            };
+        }
+
+        return {
+            type: authorization.type,
+            value: resolveResolvableString(authorization.value),
+        };
+    }
+
+    const createRelayPayload = (request: PendingRequest) => {
         // Generate Content-Type header just before making the request
         // This ensures the correct header is sent without persisting it in the store
         const headersWithContentType = generateContentTypeHeader(
@@ -80,17 +133,17 @@ export function useHttpClient(): UseHttpClientResult {
                 .map(
                     (parameter): RequestHeader => ({
                         key: parameter.key,
-                        value: parameter.value,
+                        value: resolveResolvableString(parameter.value),
                     }),
                 ),
         );
 
         return {
-            endpoint: buildRequestUrl(request),
+            endpoint: buildUrlFromRequest(request),
             method: request.method,
             headers: headersWithContentType,
-            authorization: request.authorization,
-            body: request.body,
+            authorization: buildRelayAuthorization(request.authorization),
+            body: getMemoizedBody(request),
         };
     };
 
@@ -123,7 +176,7 @@ export function useHttpClient(): UseHttpClientResult {
         };
     };
 
-    const sendRequest = (request: Request): Promise<RequestResult | null> => {
+    const sendRequest = (request: PendingRequest): Promise<RequestResult | null> => {
         return new Promise<RequestResult | null>((resolve, reject) => {
             const url = configStore.appBasePath + '/api/relay';
             const payload = createRelayPayload(request);
@@ -202,7 +255,9 @@ export function useHttpClient(): UseHttpClientResult {
         abortController.value.abort();
     };
 
-    const executeRequest = async (request: Request): Promise<RequestResult | null> => {
+    const executeRequest = async (
+        request: PendingRequest,
+    ): Promise<RequestResult | null> => {
         // Prevent concurrent requests to avoid race conditions
         if (isExecuting.value) {
             throw new Error('Request already in progress');
@@ -231,7 +286,7 @@ export function useHttpClient(): UseHttpClientResult {
         // Actions
         executeRequest,
         cancelCurrentRequest,
-        buildRequestUrl,
+        buildUrlFromRequest,
 
         // State
         isExecuting: readonly(isExecuting),

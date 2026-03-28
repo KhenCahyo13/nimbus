@@ -4,17 +4,12 @@
 
 export { generateCurlCommand } from './curl-generator';
 export {
-    EnvironmentPlaceholderStatus,
-    createEnvironmentVariablesMap,
-    getEndpointSegments,
-    getEnvironmentPlaceholderStatus,
-    getPlaceholderStatus,
-    getResolvedPlaceholder,
-    resolveEnvironmentVariables,
-    resolveEnvironmentVariablesInBody,
-    resolveEnvironmentVariablesInParameters,
-    type EndpointSegment,
-    type EnvironmentSubstitutionVariable,
+    EnvVariableCheckStatus,
+    checkEnvVariable,
+    getEnvKeyValue,
+    getStringSegments,
+    replaceEnvVariablesInString,
+    type StringSegment,
 } from './environment-variable-resolver';
 export { buildRequestUrl } from './request-url-builder';
 export {
@@ -23,3 +18,4 @@ export {
     generateSuccessRequestLog,
     getDefaultPayloadTypeForRoute,
 } from './request-utils';
+export { rawResolvableString, resolveResolvableString } from './resolvable-value';

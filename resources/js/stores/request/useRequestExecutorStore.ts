@@ -1,11 +1,11 @@
 import { useHttpClient } from '@/composables/request/useHttpClient';
-import { useResolvedRequest } from '@/composables/request/useResolvedRequest';
 import type { ErrorPlainResponse, PendingRequest } from '@/interfaces/http';
 import { useRequestsHistoryStore, useTabsStore } from '@/stores';
 import {
     createRequestTimer,
     generateErrorRequestLog,
     generateSuccessRequestLog,
+    rawResolvableString,
 } from '@/utils/request';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
@@ -23,7 +23,6 @@ export const useRequestExecutorStore = defineStore('_requestExecutor', () => {
 
     const historyStore = useRequestsHistoryStore();
     const tabsStore = useTabsStore();
-    const { resolveRequest } = useResolvedRequest();
     const { executeRequest, cancelCurrentRequest } = useHttpClient();
 
     /*
@@ -42,7 +41,7 @@ export const useRequestExecutorStore = defineStore('_requestExecutor', () => {
         return (
             requestData !== null &&
             !requestData.isProcessing &&
-            requestData.endpoint.trim() !== ''
+            rawResolvableString(requestData.endpoint).trim() !== ''
         );
     });
 
@@ -85,7 +84,7 @@ export const useRequestExecutorStore = defineStore('_requestExecutor', () => {
                 }
             });
 
-            const result = await executeRequest(resolveRequest(requestData));
+            const result = await executeRequest(requestData);
 
             if (result === null) {
                 // The response request didn't finish. This means the request is canceled.

@@ -184,7 +184,7 @@ describe('useTabsStoreUnitTest', () => {
             const mockLog = {
                 id: 'log-1',
                 method: 'GET',
-                endpoint: 'users',
+                endpoint: { raw: 'users', resolved: 'users' },
             } as unknown as RequestLog;
 
             // Act
@@ -206,8 +206,14 @@ describe('useTabsStoreUnitTest', () => {
             store.openTab(secondRoute, [secondRoute]);
             const id2 = store.tabs[1].id;
 
-            const log1 = { id: 'log-1', endpoint: 'users' } as unknown as RequestLog;
-            const log2 = { id: 'log-2', endpoint: 'posts' } as unknown as RequestLog;
+            const log1 = {
+                id: 'log-1',
+                endpoint: { raw: 'users', resolved: 'users' },
+            } as unknown as RequestLog;
+            const log2 = {
+                id: 'log-2',
+                endpoint: { raw: 'posts', resolved: 'posts' },
+            } as unknown as RequestLog;
 
             // Act
 
@@ -237,11 +243,17 @@ describe('useTabsStoreUnitTest', () => {
 
             // Act
 
-            store.updateRequestEndpoint('new-endpoint');
+            store.updateRequestEndpoint({
+                raw: 'new-endpoint',
+                resolved: 'new-endpoint',
+            });
 
             // Assert
 
-            expect(store.activeRequest?.endpoint).toBe('new-endpoint');
+            expect(store.activeRequest?.endpoint).toEqual({
+                raw: 'new-endpoint',
+                resolved: 'new-endpoint',
+            });
         });
 
         it('synchronizes global headers when switching apps across tabs', () => {
@@ -303,7 +315,7 @@ describe('useTabsStoreUnitTest', () => {
 
             expect(store.tabs).toHaveLength(1);
             expect(store.activeTabId).toMatch(/^[0-9a-f-]{36}$/);
-            expect(store.activeRequest?.endpoint).toBe('shared-route');
+            expect(store.activeRequest?.endpoint).toEqual('shared-route');
         });
     });
 });
