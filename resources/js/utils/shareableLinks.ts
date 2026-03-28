@@ -6,12 +6,8 @@
 
 import type { AuthorizationContract } from '@/interfaces';
 import type { RequestLog } from '@/interfaces/history/logs';
-import type {
-    PendingRequest,
-    RequestBodyTypeEnum,
-    ResolvableString,
-    Response,
-} from '@/interfaces/http';
+import { PendingRequest, RequestBodyTypeEnum, Response } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import type { ShareableLinkPayload } from '@/interfaces/share';
 import { resolveResolvableString } from '@/utils/request';
 import pako from 'pako';

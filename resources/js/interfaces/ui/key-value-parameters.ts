@@ -1,4 +1,4 @@
-import type { ResolvableString } from '@/interfaces/http/request';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 
 export interface ParameterContract {
     id?: number;

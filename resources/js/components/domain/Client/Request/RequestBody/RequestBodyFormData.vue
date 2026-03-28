@@ -4,7 +4,7 @@
  * @description Key-value editor for FormData request bodies.
  */
 import KeyValueParametersBuilder from '@/components/common/KeyValueParameters/KeyValueParameters.vue';
-import type { ResolvableString } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { type ParameterContract } from '@/interfaces/ui';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
 import { rawResolvableString } from '@/utils/request';

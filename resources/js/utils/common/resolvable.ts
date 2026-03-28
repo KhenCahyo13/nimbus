@@ -1,4 +1,4 @@
-import type { ResolvableString } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 
 /**
  * Safely extracts the raw string value from either a primitive or a ResolvableValue.

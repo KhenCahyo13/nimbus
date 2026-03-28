@@ -4,7 +4,7 @@
  * @description Input field for Bearer Token authentication.
  */
 import EnvironmentAwareInput from '@/components/common/EnvironmentAwareInput.vue';
-import type { ResolvableString } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 
 /*
  * Component Setup.

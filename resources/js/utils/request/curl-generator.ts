@@ -1,12 +1,13 @@
 import type { ParameterContract } from '@/interfaces';
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
 import { AuthorizationType } from '@/interfaces/generated';
-import type { PendingRequest, ResolvableString } from '@/interfaces/http';
+import { PendingRequest } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import { ParameterType } from '@/interfaces/ui/key-value-parameters';
 import { buildRequestUrl } from '@/utils';
 import { getMimeTypeForPayloadType } from '@/utils/request/content-type-header-generator';
-import { resolveResolvableString } from '@/utils/request/resolvable-value';
+import { resolveResolvableString } from '@/utils/common/resolvable';
 
 /**
  * Result of cURL command generation.

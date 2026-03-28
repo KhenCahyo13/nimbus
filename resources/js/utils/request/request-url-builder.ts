@@ -1,5 +1,5 @@
 import type { ParameterContract } from '@/interfaces';
-import { resolveResolvableString } from '@/utils/request/resolvable-value';
+import { resolveResolvableString } from '@/utils/common/resolvable';
 
 /**
  * Checks if a query parameter is valid for inclusion in URLs.

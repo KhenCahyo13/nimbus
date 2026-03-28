@@ -9,7 +9,7 @@ import {
 } from '@/utils/request/environment-variable-resolver';
 import { computed, type Ref, ref, watch } from 'vue';
 
-import type { ResolvableString } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 
 export interface EnvVariablesAwareStringResult {
     raw: Ref<string>;

@@ -1,4 +1,4 @@
-import type { ResolvableString } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { rawResolvableString } from '@/utils/request';
 import { computed, type ComputedRef, type Ref } from 'vue';
 

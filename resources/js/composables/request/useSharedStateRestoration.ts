@@ -1,6 +1,7 @@
 import type { AuthorizationContract } from '@/interfaces';
 import type { RequestLog } from '@/interfaces/history/logs';
-import type { Request, RequestBodyTypeEnum, ResolvableString } from '@/interfaces/http';
+import { Request, RequestBodyTypeEnum } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import type { Response } from '@/interfaces/http/response';
 import type { RouteDefinition } from '@/interfaces/routes/routes';
 import type { ShareableLinkPayload, SharedState } from '@/interfaces/share';

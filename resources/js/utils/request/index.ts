@@ -18,4 +18,4 @@ export {
     generateSuccessRequestLog,
     getDefaultPayloadTypeForRoute,
 } from './request-utils';
-export { rawResolvableString, resolveResolvableString } from './resolvable-value';
+export { rawResolvableString, resolveResolvableString } from '../common/resolvable';

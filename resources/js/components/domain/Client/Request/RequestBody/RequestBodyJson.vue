@@ -5,7 +5,7 @@
  */
 import CodeEditor from '@/components/domain/CodeEditor/CodeEditor.vue';
 import { envVariablesCheck } from '@/components/domain/CodeEditor/extensions';
-import type { ResolvableString } from '@/interfaces/http';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { useEnvironmentVariablesStore } from '@/stores';
 import { rawResolvableString } from '@/utils/request';
 import {

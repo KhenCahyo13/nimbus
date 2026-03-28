@@ -1,9 +1,9 @@
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
 import type { RouteDefinition } from '@/interfaces/routes/routes';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import type { ParameterContract } from '@/interfaces/ui';
 import type { JSONSchema7 } from 'json-schema';
 
-export type ResolvableString = string | { raw: string; resolved: string };
 
 export enum RequestBodyTypeEnum {
     EMPTY = 'empty',
