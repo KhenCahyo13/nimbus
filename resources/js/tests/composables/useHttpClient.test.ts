@@ -1,6 +1,6 @@
 import { useHttpClient } from '@/composables/request/useHttpClient';
 import { AuthorizationType } from '@/interfaces/generated';
-import {createMockRelayProxyResponse, createMockRequest} from '@/tests/_utils/test-factories';
+import { createMockRelayProxyResponse } from '@/tests/_utils/test-factories';
 import axios from 'axios';
 import type { Mocked } from 'vitest';
 import { describe, expect, it, vi } from 'vitest';
@@ -23,8 +23,8 @@ vi.mock('@/stores', () => ({
     useConfigStore: () => mockConfigStore,
 }));
 
+import { ParameterType } from '@/interfaces';
 import { RequestBodyTypeEnum, type PendingRequest } from '@/interfaces/http';
-import {ParameterType} from "@/interfaces";
 
 const createMockPendingRequest = (
     overrides: Partial<PendingRequest> = {},

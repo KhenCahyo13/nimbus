@@ -1,5 +1,5 @@
-import { PendingRequest, RequestHeader } from '@/interfaces/http';
 import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { PendingRequest, RequestHeader } from '@/interfaces/http';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import { useRequestStore } from '@/stores';
 import {

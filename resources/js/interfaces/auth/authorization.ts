@@ -1,5 +1,5 @@
-import type { AuthorizationType } from '@/interfaces/generated';
 import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { AuthorizationType } from '@/interfaces/generated';
 
 /**
  * Base interface for all authorization contracts

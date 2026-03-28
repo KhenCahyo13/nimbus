@@ -103,7 +103,9 @@ const executeCurrentRequestWhenEnterIsPressed = (event: KeyboardEvent) => {
                 </AppPopoverAnchor>
 
                 <AppPopoverContent align="start" class="w-80 p-1">
-                    <RequestBuilderEndpointParameterWarningContent :parameters="parameters" />
+                    <RequestBuilderEndpointParameterWarningContent
+                        :parameters="parameters"
+                    />
                 </AppPopoverContent>
             </AppPopover>
 

@@ -1,5 +1,6 @@
 import type { ParameterContract } from '@/interfaces';
 import { ParameterType } from '@/interfaces';
+import { resolveResolvableString } from '@/utils/common/resolvable';
 import {
     checkEnvVariable,
     EnvVariableCheckStatus,
@@ -7,7 +8,6 @@ import {
     getStringSegments,
     replaceEnvVariablesInString,
 } from '@/utils/request/environment-variable-resolver';
-import { resolveResolvableString } from '@/utils/common/resolvable';
 import { describe, expect, it } from 'vitest';
 
 const createEnvVariablesMap = (variables: ParameterContract[]) => {

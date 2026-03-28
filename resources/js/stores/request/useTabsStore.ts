@@ -1,9 +1,13 @@
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
+import type { ResolvableString } from '@/interfaces/common/resolvable';
 import { AuthorizationType } from '@/interfaces/generated';
 import type { RequestLog } from '@/interfaces/history/logs';
-import { GeneratorType, PendingRequest, SourceGlobalHeaders } from '@/interfaces/http';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
-import { RequestBodyTypeEnum } from '@/interfaces/http';
+import type {
+    GeneratorType,
+    PendingRequest,
+    RequestBodyTypeEnum,
+    SourceGlobalHeaders,
+} from '@/interfaces/http';
 import type { RouteDefinition } from '@/interfaces/routes/routes';
 import type { ShareableLinkPayload } from '@/interfaces/share';
 import type { ParameterContract } from '@/interfaces/ui';

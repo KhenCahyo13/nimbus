@@ -2,6 +2,7 @@
  * Request building and execution utilities
  */
 
+export { rawResolvableString, resolveResolvableString } from '../common/resolvable';
 export { generateCurlCommand } from './curl-generator';
 export {
     EnvVariableCheckStatus,
@@ -18,4 +19,3 @@ export {
     generateSuccessRequestLog,
     getDefaultPayloadTypeForRoute,
 } from './request-utils';
-export { rawResolvableString, resolveResolvableString } from '../common/resolvable';

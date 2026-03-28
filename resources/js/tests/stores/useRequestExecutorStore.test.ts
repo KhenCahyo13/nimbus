@@ -1,9 +1,9 @@
 import type { PendingRequest } from '@/interfaces';
 import { useRequestExecutorStore } from '@/stores/request/useRequestExecutorStore';
+import { createMockPendingRequest } from '@/tests/_utils/test-factories';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { reactive } from 'vue';
-import {createMockPendingRequest} from "@/tests/_utils/test-factories";
 
 /*
  * Fixtures.
