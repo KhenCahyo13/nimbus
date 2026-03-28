@@ -164,14 +164,30 @@ export const useEnvironmentVariablesStore = defineStore(
          * Resolves all environment variable placeholders in a string.
          */
         const resolve = (value: string): string => {
-            return resolveInString(value, variables.value);
+            if (!value.includes('{{')) {
+                return value;
+            }
+
+            return value.replace(PLACEHOLDER_PATTERN, (match, key) => {
+                const normalizedKey = String(key).trim();
+
+                return variables.value.get(normalizedKey) ?? match;
+            });
         };
 
         /**
-         * Checks the status of environment variables within a string.
+         * Checks the status of a specific environment variable key.
          */
-        const check = (value: string): EnvVariableCheckStatus => {
-            return checkStatus(value, variables.value);
+        const check = (key: string): EnvVariableCheckStatus => {
+            if (!variables.value.has(key)) {
+                return EnvVariableCheckStatus.Missing;
+            }
+
+            if ((variables.value.get(key) ?? '') === '') {
+                return EnvVariableCheckStatus.Empty;
+            }
+
+            return EnvVariableCheckStatus.Resolved;
         };
 
         /**
@@ -232,49 +248,6 @@ const extractPlaceholderKeys = (value: string): string[] => {
         String(match[1]).trim(),
     );
 };
-
-/**
- * Resolves all environment variable placeholders in a string.
- */
-function resolveInString(value: string, variables: Map<string, string>): string {
-    if (!value.includes('{{')) {
-        return value;
-    }
-
-    return value.replace(PLACEHOLDER_PATTERN, (match, key) => {
-        const normalizedKey = String(key).trim();
-
-        return variables.get(normalizedKey) ?? match;
-    });
-}
-
-/**
- * Checks the status of environment variables within a string.
- */
-function checkStatus(
-    value: string,
-    variables: Map<string, string>,
-): EnvVariableCheckStatus {
-    const keys = extractPlaceholderKeys(value);
-
-    if (keys.length === 0) {
-        return EnvVariableCheckStatus.None;
-    }
-
-    for (const key of keys) {
-        if (!variables.has(key)) {
-            return EnvVariableCheckStatus.Missing;
-        }
-    }
-
-    for (const key of keys) {
-        if ((variables.get(key) ?? '') === '') {
-            return EnvVariableCheckStatus.Empty;
-        }
-    }
-
-    return EnvVariableCheckStatus.Resolved;
-}
 
 /**
  * Parses a string into segments with their resolution status and values.

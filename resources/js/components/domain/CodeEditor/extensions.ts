@@ -57,7 +57,7 @@ export const envVariablesCheck = (
                 continue;
             }
 
-            const status = getStatus(value);
+            const status = getStatus(match[1]);
 
             if (status === EnvVariableCheckStatus.None) {
                 continue;

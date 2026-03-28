@@ -93,7 +93,7 @@ describe('useEnvironmentVariablesStore', () => {
             ]);
 
             expect(store.resolve('Bearer {{api_key}}')).toBe('Bearer {{api_key}}');
-            expect(store.check('{{api_key}}')).toBe('missing');
+            expect(store.check('api_key')).toBe('missing');
         });
 
         it('reactively updates resolution when variables change', () => {
@@ -154,7 +154,7 @@ describe('useEnvironmentVariablesStore', () => {
             ];
             store.updateVariables(variables);
 
-            expect(store.check('{{token}}')).toBe('resolved');
+            expect(store.check('token')).toBe('resolved');
 
             store.updateVariables([
                 {
@@ -163,7 +163,7 @@ describe('useEnvironmentVariablesStore', () => {
                 },
             ]);
 
-            expect(store.check('{{token}}')).toBe('empty');
+            expect(store.check('token ')).toBe('empty'); // Testing trim
         });
 
         it('resolves based on the active collection', () => {

@@ -41,7 +41,7 @@ const modelProxy = computed({
 });
 
 const customExtensions = computed(() => {
-    return [envVariablesCheck(match => environmentVariablesStore.check(match))];
+    return [envVariablesCheck(key => environmentVariablesStore.check(key))];
 });
 </script>
 
