@@ -3,15 +3,15 @@ import { rawResolvableString } from '@/utils/request';
 import { computed, type ComputedRef, type Ref } from 'vue';
 
 /**
- * Composable for detecting dynamic placeholders in a route endpoint URL.
+ * Composable for parsing dynamic parameters in a route endpoint URL.
  */
-export function useRoutePlaceholderDetection(
+export function useRouteParameterParsing(
     endpoint: Ref<ResolvableString> | ComputedRef<ResolvableString>,
 ): {
-    placeholders: ComputedRef<string[]>;
-    hasPlaceholders: ComputedRef<boolean>;
+    parameters: ComputedRef<string[]>;
+    hasParameters: ComputedRef<boolean>;
 } {
-    const placeholders = computed(() => {
+    const parameters = computed(() => {
         const url = rawResolvableString(endpoint.value);
 
         if (!url) {
@@ -23,10 +23,10 @@ export function useRoutePlaceholderDetection(
         return matches.map(match => match[1]);
     });
 
-    const hasPlaceholders = computed(() => placeholders.value.length > 0);
+    const hasParameters = computed(() => parameters.value.length > 0);
 
     return {
-        placeholders,
-        hasPlaceholders,
+        parameters,
+        hasParameters,
     };
 }

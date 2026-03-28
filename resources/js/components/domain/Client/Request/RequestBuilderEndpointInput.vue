@@ -15,13 +15,13 @@ import {
 } from '@/components/base/popover';
 import EnvironmentAwareInput from '@/components/common/EnvironmentAwareInput.vue';
 
-import { useRoutePlaceholderDetection } from '@/composables/request/useRoutePlaceholderDetection';
+import { useRouteParameterParsing } from '@/composables/request/useRouteParameterParsing';
 import { useRouteSegmentSelection } from '@/composables/request/useRouteSegmentSelection';
 import type { ResolvableString } from '@/interfaces/http';
 import { useRequestStore } from '@/stores';
 import { CornerDownLeftIcon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import RequestBuilderEndpointPlaceholderWarningContent from './RequestBuilderEndpointPlaceholderWarningContent.vue';
+import RequestBuilderEndpointParameterWarningContent from './RequestBuilderEndpointParameterWarningContent.vue';
 
 /*
  * Stores.
@@ -33,7 +33,7 @@ const requestStore = useRequestStore();
  * State.
  */
 
-const showPlaceholderWarning = ref(false);
+const showParameterWarning = ref(false);
 const pendingRequestData = computed(() => requestStore.pendingRequestData);
 
 const endpoint = computed({
@@ -41,7 +41,7 @@ const endpoint = computed({
     set: (value: ResolvableString) => requestStore.updateRequestEndpoint(value),
 });
 
-const { placeholders, hasPlaceholders } = useRoutePlaceholderDetection(endpoint);
+const { parameters, hasParameters } = useRouteParameterParsing(endpoint);
 
 const { handleClick: autoSelectRouteVariableSegmentWhenApplicable } =
     useRouteSegmentSelection({ endpoint });
@@ -51,13 +51,13 @@ const executeCurrentRequest = async function () {
         return;
     }
 
-    if (hasPlaceholders.value) {
-        showPlaceholderWarning.value = true;
+    if (hasParameters.value) {
+        showParameterWarning.value = true;
 
         return;
     }
 
-    showPlaceholderWarning.value = false;
+    showParameterWarning.value = false;
 
     await requestStore.executeCurrentRequest();
 };
@@ -86,7 +86,7 @@ const executeCurrentRequestWhenEnterIsPressed = (event: KeyboardEvent) => {
         />
 
         <div class="flex gap-2 pr-2">
-            <AppPopover v-model:open="showPlaceholderWarning">
+            <AppPopover v-model:open="showParameterWarning">
                 <AppPopoverAnchor as-child>
                     <AppButton
                         size="xs"
@@ -103,9 +103,7 @@ const executeCurrentRequestWhenEnterIsPressed = (event: KeyboardEvent) => {
                 </AppPopoverAnchor>
 
                 <AppPopoverContent align="start" class="w-80 p-1">
-                    <RequestBuilderEndpointPlaceholderWarningContent
-                        :placeholders="placeholders"
-                    />
+                    <RequestBuilderEndpointParameterWarningContent :parameters="parameters" />
                 </AppPopoverContent>
             </AppPopover>
 
