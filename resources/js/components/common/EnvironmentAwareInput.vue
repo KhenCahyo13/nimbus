@@ -8,8 +8,10 @@ import { AppInput, inputVariants, type InputVariants } from '@/components/base/i
 import { EnvVariableSegment } from '@/components/common/EnvVariableSegment';
 import { useEnvVariablesAwareString } from '@/composables/request/useEnvVariablesAwareString';
 import { useTabHorizontalScroll } from '@/composables/ui/useTabHorizontalScroll';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
-import { EnvVariableCheckStatus } from '@/utils/request/environment-variable-resolver';
+import {
+    EnvVariableCheckStatus,
+    type ResolvableString,
+} from '@/interfaces/common/resolvable-string';
 import { cn } from '@/utils/ui';
 import { useForwardExpose, useForwardPropsEmits } from 'reka-ui';
 import { computed, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';

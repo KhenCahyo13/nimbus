@@ -17,7 +17,7 @@ import EnvironmentAwareInput from '@/components/common/EnvironmentAwareInput.vue
 
 import { useRouteParameterParsing } from '@/composables/request/useRouteParameterParsing';
 import { useRouteSegmentSelection } from '@/composables/request/useRouteSegmentSelection';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { useRequestStore } from '@/stores';
 import { CornerDownLeftIcon } from 'lucide-vue-next';
 import { computed, ref } from 'vue';

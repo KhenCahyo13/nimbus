@@ -4,7 +4,7 @@
  * @description Dynamic content renderer for the request body based on the selected payload type.
  */
 import { AppScrollArea } from '@/components/base/scroll-area';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import type { JSONSchema7 } from 'json-schema';
 import RequestBodyFormData from './RequestBodyFormData.vue';

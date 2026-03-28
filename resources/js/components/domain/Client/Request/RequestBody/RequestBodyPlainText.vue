@@ -5,12 +5,8 @@
  */
 import CodeEditor from '@/components/domain/CodeEditor/CodeEditor.vue';
 import { envVariablesCheck } from '@/components/domain/CodeEditor/extensions';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { useEnvironmentVariablesStore } from '@/stores';
-import {
-    checkEnvVariable,
-    replaceEnvVariablesInString,
-} from '@/utils/request/environment-variable-resolver';
 import { computed } from 'vue';
 
 /*
@@ -31,22 +27,18 @@ const model = defineModel<ResolvableString>({
 
 const environmentVariablesStore = useEnvironmentVariablesStore();
 
-const envVariablesMap = computed(() => {
-    return environmentVariablesStore.variables;
-});
-
 const modelProxy = computed({
     get: () => model.value.raw,
-    set: value => {
+    set: raw => {
         model.value = {
-            raw: value,
-            resolved: replaceEnvVariablesInString(value, envVariablesMap.value),
+            raw,
+            resolved: environmentVariablesStore.resolve(raw),
         };
     },
 });
 
 const customExtensions = computed(() => {
-    return [envVariablesCheck(match => checkEnvVariable(match, envVariablesMap.value))];
+    return [envVariablesCheck(match => environmentVariablesStore.check(match))];
 });
 </script>
 

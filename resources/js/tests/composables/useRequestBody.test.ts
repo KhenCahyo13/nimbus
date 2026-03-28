@@ -1,5 +1,5 @@
 import { useRequestBody } from '@/composables/request/useRequestBody';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { AuthorizationType } from '@/interfaces/generated';
 import type { PendingRequest } from '@/interfaces/http';
 import { RequestBodyTypeEnum } from '@/interfaces/http';

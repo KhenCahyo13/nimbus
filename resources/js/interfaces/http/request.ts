@@ -1,5 +1,5 @@
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import type { RouteDefinition } from '@/interfaces/routes/routes';
 import type { ParameterContract } from '@/interfaces/ui';
 import type { JSONSchema7 } from 'json-schema';

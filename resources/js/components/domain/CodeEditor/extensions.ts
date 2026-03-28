@@ -1,6 +1,8 @@
 import { jsonLinter } from '@/components/domain/CodeEditor/jsonLinter';
-import { EnvVariableCheckStatus } from '@/utils/request';
-import { PLACEHOLDER_PATTERN } from '@/utils/request/environment-variable-resolver';
+import {
+    EnvVariableCheckStatus,
+    PLACEHOLDER_PATTERN,
+} from '@/interfaces/common/resolvable-string';
 import { json } from '@codemirror/lang-json';
 import { type Diagnostic, linter, lintGutter } from '@codemirror/lint';
 import { EditorState, type Extension } from '@codemirror/state';

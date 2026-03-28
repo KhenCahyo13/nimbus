@@ -1,4 +1,4 @@
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { RequestBodyTypeEnum } from '@/interfaces/http';
 import type { PayloadObject } from '@/interfaces/schema/payload';
 import { convertPayloadToFormData } from '@/utils/http';

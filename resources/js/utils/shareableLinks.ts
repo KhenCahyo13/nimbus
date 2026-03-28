@@ -5,7 +5,7 @@
  */
 
 import type { AuthorizationContract } from '@/interfaces';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import type { RequestLog } from '@/interfaces/history/logs';
 import type { PendingRequest, RequestBodyTypeEnum, Response } from '@/interfaces/http';
 import type { ShareableLinkPayload } from '@/interfaces/share';

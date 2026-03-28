@@ -1,4 +1,4 @@
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import type { AuthorizationType } from '@/interfaces/generated';
 
 /**

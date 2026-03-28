@@ -1,3 +1,8 @@
+import {
+    EnvVariableCheckStatus,
+    PLACEHOLDER_PATTERN,
+    type StringSegment,
+} from '@/interfaces/common/resolvable-string';
 import { type ParameterContract, ParameterType } from '@/interfaces/ui';
 import { defineStore } from 'pinia';
 import type { ComputedRef, Ref } from 'vue';
@@ -13,17 +18,7 @@ export type EnvironmentCollection = {
     variables: ParameterContract[];
 };
 
-/*
- * Helpers.
- */
-
-function createDefaultCollection(index: number): EnvironmentCollection {
-    return {
-        id: crypto.randomUUID(),
-        name: `Collection ${index}`,
-        variables: [],
-    };
-}
+export { EnvVariableCheckStatus, PLACEHOLDER_PATTERN, type StringSegment };
 
 /*
  * Store Definition.
@@ -165,6 +160,31 @@ export const useEnvironmentVariablesStore = defineStore(
             isRenamingActiveCollection.value = false;
         };
 
+        /**
+         * Resolves all environment variable placeholders in a string.
+         */
+        const resolve = (value: string): string => {
+            return resolveInString(value, variables.value);
+        };
+
+        /**
+         * Checks the status of environment variables within a string.
+         */
+        const check = (value: string): EnvVariableCheckStatus => {
+            return checkStatus(value, variables.value);
+        };
+
+        /**
+         * Parses a string into segments with their resolution status and values.
+         */
+        const getSegments = (value: string): StringSegment[] => {
+            return getStringSegments(value, variables.value);
+        };
+
+        /*
+         * Lifecycle.
+         */
+
         onMounted(() => (isRenamingActiveCollection.value = false));
 
         return {
@@ -186,9 +206,133 @@ export const useEnvironmentVariablesStore = defineStore(
             renameActive,
             updateVariables,
             completeRenaming,
+            resolve,
+            check,
+            getSegments,
         };
     },
     {
         persist: true,
     },
 );
+
+/*
+ * Helpers.
+ */
+
+function createDefaultCollection(index: number): EnvironmentCollection {
+    return {
+        id: crypto.randomUUID(),
+        name: `Collection ${index}`,
+        variables: [],
+    };
+}
+const extractPlaceholderKeys = (value: string): string[] => {
+    return Array.from(value.matchAll(PLACEHOLDER_PATTERN)).map(match =>
+        String(match[1]).trim(),
+    );
+};
+
+/**
+ * Resolves all environment variable placeholders in a string.
+ */
+function resolveInString(value: string, variables: Map<string, string>): string {
+    if (!value.includes('{{')) {
+        return value;
+    }
+
+    return value.replace(PLACEHOLDER_PATTERN, (match, key) => {
+        const normalizedKey = String(key).trim();
+
+        return variables.get(normalizedKey) ?? match;
+    });
+}
+
+/**
+ * Checks the status of environment variables within a string.
+ */
+function checkStatus(
+    value: string,
+    variables: Map<string, string>,
+): EnvVariableCheckStatus {
+    const keys = extractPlaceholderKeys(value);
+
+    if (keys.length === 0) {
+        return EnvVariableCheckStatus.None;
+    }
+
+    for (const key of keys) {
+        if (!variables.has(key)) {
+            return EnvVariableCheckStatus.Missing;
+        }
+    }
+
+    for (const key of keys) {
+        if ((variables.get(key) ?? '') === '') {
+            return EnvVariableCheckStatus.Empty;
+        }
+    }
+
+    return EnvVariableCheckStatus.Resolved;
+}
+
+/**
+ * Parses a string into segments with their resolution status and values.
+ */
+function getStringSegments(
+    value: string,
+    variables: Map<string, string>,
+): StringSegment[] {
+    const segments: StringSegment[] = [];
+
+    let lastIndex = 0;
+
+    const matches = Array.from(value.matchAll(PLACEHOLDER_PATTERN));
+
+    for (const match of matches) {
+        const index = match.index!;
+
+        if (index > lastIndex) {
+            segments.push({
+                text: value.substring(lastIndex, index),
+                isEnvVariable: false,
+                status: EnvVariableCheckStatus.None,
+                resolvedValue: null,
+            });
+        }
+
+        const text = match[0];
+        const key = match[1].trim();
+
+        let status = EnvVariableCheckStatus.Missing;
+        let resolvedValue = null;
+
+        if (variables.has(key)) {
+            resolvedValue = variables.get(key) ?? '';
+            status =
+                resolvedValue === ''
+                    ? EnvVariableCheckStatus.Empty
+                    : EnvVariableCheckStatus.Resolved;
+        }
+
+        segments.push({
+            text,
+            isEnvVariable: true,
+            status,
+            resolvedValue,
+        });
+
+        lastIndex = index + match[0].length;
+    }
+
+    if (lastIndex < value.length) {
+        segments.push({
+            text: value.substring(lastIndex),
+            isEnvVariable: false,
+            status: EnvVariableCheckStatus.None,
+            resolvedValue: null,
+        });
+    }
+
+    return segments;
+}

@@ -4,7 +4,7 @@ import {
     AppPopoverAnchor,
     AppPopoverContent,
 } from '@/components/base/popover';
-import { EnvVariableCheckStatus } from '@/utils/request';
+import {EnvVariableCheckStatus} from "@/interfaces/common/resolvable-string";
 
 /*
  * Types & Interfaces.

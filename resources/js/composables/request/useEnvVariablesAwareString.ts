@@ -1,15 +1,9 @@
-import { useEnvironmentVariablesStore } from '@/stores';
 import {
-    checkEnvVariable,
-    EnvVariableCheckStatus,
-    getEnvKeyValue,
-    getStringSegments,
-    replaceEnvVariablesInString,
+    type ResolvableString,
     type StringSegment,
-} from '@/utils/request/environment-variable-resolver';
+} from '@/interfaces/common/resolvable-string';
+import { useEnvironmentVariablesStore } from '@/stores/core/useEnvironmentVariablesStore';
 import { computed, type Ref, ref, watch } from 'vue';
-
-import type { ResolvableString } from '@/interfaces/common/resolvable';
 
 export interface EnvVariablesAwareStringResult {
     raw: Ref<string>;
@@ -39,30 +33,12 @@ export function useEnvVariablesAwareString(
      * Computed.
      */
 
-    const variables = computed(() => {
-        return environmentVariablesStore.variables;
-    });
-
     const fullyResolvedString = computed(() => {
-        return replaceEnvVariablesInString(rawValue.value, variables.value);
+        return environmentVariablesStore.resolve(rawValue.value);
     });
 
     const segments = computed(() => {
-        return getStringSegments(rawValue.value).map(segment => {
-            if (!segment.isEnvVariable) {
-                return {
-                    ...segment,
-                    status: EnvVariableCheckStatus.None,
-                    resolved: null,
-                };
-            }
-
-            return {
-                ...segment,
-                status: checkEnvVariable(segment.text, variables.value),
-                resolvedValue: getEnvKeyValue(segment.text, variables.value),
-            };
-        });
+        return environmentVariablesStore.getSegments(rawValue.value);
     });
 
     /*

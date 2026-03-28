@@ -1,6 +1,6 @@
 import { type ParameterContract, ParameterType } from '@/interfaces';
 import type { AuthorizationContract } from '@/interfaces/auth/authorization';
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { AuthorizationType } from '@/interfaces/generated';
 import type { RequestLog } from '@/interfaces/history/logs';
 import type { RelayProxyResponse } from '@/interfaces/http';

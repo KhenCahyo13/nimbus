@@ -1,4 +1,4 @@
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { type DeepReadonly, type Ref, nextTick, readonly, ref, watch } from 'vue';
 
 export interface UseRouteSegmentSelectionOptions {

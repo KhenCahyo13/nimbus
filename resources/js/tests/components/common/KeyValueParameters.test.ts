@@ -10,7 +10,7 @@ import { computed, nextTick, ref } from 'vue';
  * Fixtures.
  */
 
-import type { ResolvableString } from '@/interfaces/common/resolvable';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 
 const parameters: Ref<
     Array<{
