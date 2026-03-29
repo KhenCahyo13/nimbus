@@ -256,5 +256,41 @@ describe('useEnvironmentVariablesStore', () => {
                 resolvedValue: null,
             });
         });
+
+        describe('safety and edge cases', () => {
+            it('handles null or undefined resolution inputs gracefully', () => {
+                const store = useEnvironmentVariablesStore();
+
+                // @ts-expect-error - testing invalid input
+                expect(store.resolve(null)).toBe('');
+                // @ts-expect-error - testing invalid input
+                expect(store.resolve(undefined)).toBe('');
+                // @ts-expect-error - testing invalid input
+                expect(store.check(null)).toBe('none');
+                // @ts-expect-error - testing invalid input
+                expect(store.getSegments(null)).toEqual([]);
+            });
+
+            it('returns the placeholder if a variable is missing', () => {
+                const store = useEnvironmentVariablesStore();
+                expect(store.resolve('{{missing}}')).toBe('{{missing}}');
+            });
+
+            it('returns empty string if variable is present but its value is empty', () => {
+                const store = useEnvironmentVariablesStore();
+                store.addCollection();
+                store.updateVariables([
+                    {
+                        id: 1,
+                        type: ParameterType.Text,
+                        key: 'empty',
+                        value: { raw: '', resolved: '' },
+                        enabled: true,
+                    },
+                ]);
+
+                expect(store.resolve('{{empty}}')).toBe('');
+            });
+        });
     });
 });

@@ -164,6 +164,10 @@ export const useEnvironmentVariablesStore = defineStore(
          * Resolves all environment variable placeholders in a string.
          */
         const resolve = (value: string): string => {
+            if (!value) {
+                return value || '';
+            }
+
             if (!value.includes('{{')) {
                 return value;
             }
@@ -171,7 +175,11 @@ export const useEnvironmentVariablesStore = defineStore(
             return value.replace(PLACEHOLDER_PATTERN, (match, key) => {
                 const normalizedKey = String(key).trim();
 
-                return variables.value.get(normalizedKey) ?? match;
+                if (!variables.value.has(normalizedKey)) {
+                    return match;
+                }
+
+                return variables.value.get(normalizedKey) ?? '';
             });
         };
 
@@ -179,11 +187,17 @@ export const useEnvironmentVariablesStore = defineStore(
          * Checks the status of a specific environment variable key.
          */
         const check = (key: string): EnvVariableCheckStatus => {
-            if (!variables.value.has(key)) {
+            if (!key) {
+                return EnvVariableCheckStatus.None;
+            }
+
+            const normalizedKey = key.trim();
+
+            if (!variables.value.has(normalizedKey)) {
                 return EnvVariableCheckStatus.Missing;
             }
 
-            if ((variables.value.get(key) ?? '') === '') {
+            if ((variables.value.get(normalizedKey) ?? '') === '') {
                 return EnvVariableCheckStatus.Empty;
             }
 
@@ -194,6 +208,10 @@ export const useEnvironmentVariablesStore = defineStore(
          * Parses a string into segments with their resolution status and values.
          */
         const getSegments = (value: string): StringSegment[] => {
+            if (!value) {
+                return [];
+            }
+
             return getStringSegments(value, variables.value);
         };
 
