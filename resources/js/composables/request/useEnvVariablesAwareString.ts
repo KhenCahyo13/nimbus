@@ -64,7 +64,7 @@ export function useEnvVariablesAwareString(
     watch([rawValue, fullyResolvedString], ([newRaw, newResolved]) => {
         const currentSource = source.value;
 
-        if (newRaw !== currentSource.raw) {
+        if (newRaw !== currentSource.raw || newResolved !== currentSource.resolved) {
             source.value = { raw: newRaw, resolved: newResolved } as ResolvableString;
         }
     });
