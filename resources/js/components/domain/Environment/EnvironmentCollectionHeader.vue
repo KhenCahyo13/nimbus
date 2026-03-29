@@ -120,6 +120,7 @@ watch(
                 v-model="editingCollectionName"
                 placeholder="Collection name..."
                 class="flex w-full min-w-0 items-center"
+                data-testid="collection-name-editor"
                 @submit="submitCollectionName"
             >
                 <EditablePreview

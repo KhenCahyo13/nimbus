@@ -28,6 +28,7 @@ const environmentVariablesStore = useEnvironmentVariablesStore();
             <AppButton
                 variant="ghost"
                 size="xs"
+                data-testid="add-collection-btn"
                 @click="environmentVariablesStore.addCollection"
             >
                 <PlusIcon />

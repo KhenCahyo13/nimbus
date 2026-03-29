@@ -31,7 +31,7 @@ const handleCollectionSelect = (collectionId: string) => {
             class="hover:bg-subtle w-full cursor-pointer rounded border text-left text-sm"
             @click="environmentVariablesStore.addCollection"
         >
-            <div class="p-panel h-toolbar flex items-center gap-1.5">
+            <div class="p-panel h-toolbar flex items-center gap-1.5" data-testid="empty-collection-placeholder">
                 <PlusIcon class="size-3" />
                 Add your first Collection
             </div>
@@ -42,6 +42,7 @@ const handleCollectionSelect = (collectionId: string) => {
             :key="collection.id"
             type="button"
             class="p-panel hover:bg-subtle w-full cursor-pointer rounded border text-left text-sm"
+            data-testid="collection-item"
             :class="{
                 'bg-subtle':
                     environmentVariablesStore.activeCollectionId === collection.id,
@@ -62,6 +63,7 @@ const handleCollectionSelect = (collectionId: string) => {
                         "
                         variant="outline"
                         class="text-emerald-600"
+                        data-testid="collection-active-badge"
                     >
                         Active
                     </AppBadge>
