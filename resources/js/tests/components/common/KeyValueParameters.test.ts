@@ -47,6 +47,16 @@ vi.mock('@/composables/ui/useKeyValueParameters', () => ({
     }),
 }));
 
+vi.mock('@/composables/ui/useTabHorizontalScroll', () => ({
+    useTabHorizontalScroll: () => ({
+        scrollContainer: ref(null),
+        showLeftMask: ref(false),
+        showRightMask: ref(false),
+        updateScrollMasks: vi.fn(),
+        restoreScrollPosition: vi.fn(() => Promise.resolve()),
+    }),
+}));
+
 const mockActiveVariables = ref([
     {
         key: 'resolvedKey',
@@ -54,6 +64,21 @@ const mockActiveVariables = ref([
         enabled: true,
     },
 ]);
+
+vi.mock('@/stores/core/useEnvironmentVariablesStore', () => ({
+    useEnvironmentVariablesStore: () => ({
+        resolve: vi.fn(val => val),
+        getSegments: vi.fn(val => {
+            if (val === '{{resolvedKey}}') {
+                return [{ isEnvVariable: true, status: 'resolved', text: '{{resolvedKey}}' }];
+            }
+            if (val === '{{missingKey}}') {
+                return [{ isEnvVariable: true, status: 'missing', text: '{{missingKey}}' }];
+            }
+            return [{ isEnvVariable: false, text: val }];
+        }),
+    }),
+}));
 
 vi.mock('@/stores', async importOriginal => {
     const actual = await importOriginal<object>();
