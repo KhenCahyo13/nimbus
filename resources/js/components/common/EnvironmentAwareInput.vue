@@ -13,7 +13,6 @@ import {
     type ResolvableString,
 } from '@/interfaces/common/resolvable-string';
 import { cn } from '@/utils/ui';
-import { useForwardExpose, useForwardPropsEmits } from 'reka-ui';
 import { computed, onMounted, ref, watch, type ComponentPublicInstance } from 'vue';
 
 defineOptions({
@@ -76,30 +75,17 @@ const parentSourceProxy = computed({
 
 const { raw: rawValue, segments } = useEnvVariablesAwareString(parentSourceProxy);
 
-/*
- * Forwarding.
- */
 
 const delegatedProps = computed(() => {
+    /**
+     * We MUST filter out modelValue from the delegated props.
+     * If we don't, AppInput will emit raw string updates directly to the parent,
+     * bypassing our useEnvVariablesAwareString logic.
+     */
     const { class: _, inputClass: __, modelValue: ___, ...rest } = props;
 
     return rest;
 });
-
-const forwarded = useForwardPropsEmits(delegatedProps, emit);
-
-/**
- * We MUST filter out onUpdate:modelValue from the forwarded events.
- * If we don't, AppInput will emit raw string updates directly to the parent,
- * bypassing our useEnvVariablesAwareString logic.
- */
-const filteredForwarded = computed(() => {
-    const { 'onUpdate:modelValue': _, ...rest } = forwarded.value;
-
-    return rest;
-});
-
-const { forwardRef } = useForwardExpose();
 
 /*
  * Actions.
@@ -210,14 +196,9 @@ defineExpose({
     <div :class="cn('relative flex h-full min-w-0 flex-1 items-stretch', props.class)">
         <!-- Actual Input (Transparent text) - TOP LAYER -->
         <AppInput
-            :ref="
-                node => {
-                    inputRef = node as ComponentPublicInstance | HTMLElement;
-                    forwardRef(node as ComponentPublicInstance | HTMLElement);
-                }
-            "
+            ref="inputRef"
             v-model="internalRawValue"
-            v-bind="{ ...filteredForwarded, ...$attrs }"
+            v-bind="{ ...delegatedProps, ...$attrs }"
             :variant="variant"
             :class="
                 cn(
