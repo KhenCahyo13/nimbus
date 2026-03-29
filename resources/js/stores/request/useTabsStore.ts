@@ -15,6 +15,10 @@ import { ParameterType } from '@/interfaces/ui';
 import type { Tab } from '@/interfaces/ui/tabs';
 import { useConfigStore, useSettingsStore, useValueGeneratorStore } from '@/stores';
 import { buildRequestUrl, getDefaultPayloadTypeForRoute } from '@/utils/request';
+import {
+    reconstructInternalBodyFromSharableLinkBody,
+    reconstructionInternalAuthorizationFromSharableLinkAuthorization,
+} from '@/utils/shareableLinks';
 import { generateValueFromType } from '@/utils/value-generator/generateValueFromType';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
@@ -425,7 +429,7 @@ export const useTabsStore = defineStore(
                         enabled: true,
                     }),
                 ),
-                body: payload.body,
+                body: reconstructInternalBodyFromSharableLinkBody(payload.body),
                 payloadType: payload.payloadType as RequestBodyTypeEnum,
                 schema: {
                     shape: {},
@@ -445,10 +449,10 @@ export const useTabsStore = defineStore(
                         enabled: true,
                     }),
                 ),
-                authorization: {
-                    type: payload.authorization.type as AuthorizationType,
-                    value: payload.authorization.value as AuthorizationContract['value'],
-                } as AuthorizationContract,
+                authorization:
+                    reconstructionInternalAuthorizationFromSharableLinkAuthorization(
+                        payload.authorization,
+                    ),
                 supportedRoutes: [],
                 routeDefinition: {
                     endpoint: payload.endpoint as string,
