@@ -261,11 +261,6 @@ function createDefaultCollection(index: number): EnvironmentCollection {
         variables: [],
     };
 }
-const extractPlaceholderKeys = (value: string): string[] => {
-    return Array.from(value.matchAll(PLACEHOLDER_PATTERN)).map(match =>
-        String(match[1]).trim(),
-    );
-};
 
 /**
  * Parses a string into segments with their resolution status and values.

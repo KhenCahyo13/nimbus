@@ -75,7 +75,6 @@ const parentSourceProxy = computed({
 
 const { raw: rawValue, segments } = useEnvVariablesAwareString(parentSourceProxy);
 
-
 const delegatedProps = computed(() => {
     /**
      * We MUST filter out modelValue from the delegated props.

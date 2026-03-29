@@ -70,11 +70,16 @@ vi.mock('@/stores/core/useEnvironmentVariablesStore', () => ({
         resolve: vi.fn(val => val),
         getSegments: vi.fn(val => {
             if (val === '{{resolvedKey}}') {
-                return [{ isEnvVariable: true, status: 'resolved', text: '{{resolvedKey}}' }];
+                return [
+                    { isEnvVariable: true, status: 'resolved', text: '{{resolvedKey}}' },
+                ];
             }
             if (val === '{{missingKey}}') {
-                return [{ isEnvVariable: true, status: 'missing', text: '{{missingKey}}' }];
+                return [
+                    { isEnvVariable: true, status: 'missing', text: '{{missingKey}}' },
+                ];
             }
+
             return [{ isEnvVariable: false, text: val }];
         }),
     }),

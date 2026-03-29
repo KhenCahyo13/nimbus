@@ -31,7 +31,10 @@ const handleCollectionSelect = (collectionId: string) => {
             class="hover:bg-subtle w-full cursor-pointer rounded border text-left text-sm"
             @click="environmentVariablesStore.addCollection"
         >
-            <div class="p-panel h-toolbar flex items-center gap-1.5" data-testid="empty-collection-placeholder">
+            <div
+                class="p-panel h-toolbar flex items-center gap-1.5"
+                data-testid="empty-collection-placeholder"
+            >
                 <PlusIcon class="size-3" />
                 Add your first Collection
             </div>

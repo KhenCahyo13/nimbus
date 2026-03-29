@@ -1,4 +1,4 @@
-import { ResolvableString } from '@/interfaces/common/resolvable-string';
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 import { ParameterType } from '@/interfaces/ui';
 import { useEnvironmentVariablesStore } from '@/stores/core/useEnvironmentVariablesStore';
 import { createPinia, setActivePinia } from 'pinia';
@@ -95,7 +95,7 @@ describe('useEnvVariablesAwareString', () => {
         // Simulate a component directly updating the bound object
         source.value = {
             raw: '{{host}}/api',
-            resolved: 'localhost/api'
+            resolved: 'localhost/api',
         };
 
         await nextTick();

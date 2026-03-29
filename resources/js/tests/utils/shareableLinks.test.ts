@@ -166,9 +166,7 @@ describe('shareableLinks', () => {
 
             // Act
 
-            const result = reconstructInternalBodyFromSharableLinkBody(
-                inboundPayload,
-            );
+            const result = reconstructInternalBodyFromSharableLinkBody(inboundPayload);
 
             // Assert
 
@@ -191,9 +189,7 @@ describe('shareableLinks', () => {
 
             // Act
 
-            const result = reconstructInternalBodyFromSharableLinkBody(
-                inboundPayload,
-            );
+            const result = reconstructInternalBodyFromSharableLinkBody(inboundPayload);
 
             // Assert
 
@@ -208,9 +204,7 @@ describe('shareableLinks', () => {
 
             // Act
 
-            const result = reconstructInternalBodyFromSharableLinkBody(
-                inboundPayload,
-            );
+            const result = reconstructInternalBodyFromSharableLinkBody(inboundPayload);
 
             // Assert
 

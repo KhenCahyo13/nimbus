@@ -1,4 +1,4 @@
-import {ResolvableString} from "@/interfaces/common/resolvable-string";
+import type { ResolvableString } from '@/interfaces/common/resolvable-string';
 
 export interface RequestHeader {
     key: string;
