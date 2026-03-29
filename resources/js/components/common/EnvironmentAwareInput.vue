@@ -239,7 +239,7 @@ defineExpose({
             ref="mirrorRef"
             :class="
                 cn(
-                    'pointer-events-none absolute inset-0 z-0 flex items-center overflow-hidden',
+                    'pointer-events-none absolute inset-0 z-0 flex items-center overflow-hidden whitespace-pre',
                     inputVariants({ variant }),
                     sharedStyles,
                 )
