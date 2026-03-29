@@ -2,10 +2,6 @@
 /**
  * @component RequestBuilderEndpointInput
  * @description The endpoint input field and send button for the request builder.
- *
- * This component utilizes Equation's EnvironmentAwareInput to provide rich text
- * highlighting for path segments and environment variables while maintaining
- * native input features like caret stability and scrolling.
  */
 import { AppButton } from '@/components/base/button';
 import {
@@ -34,6 +30,11 @@ const requestStore = useRequestStore();
  */
 
 const showParameterWarning = ref(false);
+
+/*
+ * Computed.
+ */
+
 const pendingRequestData = computed(() => requestStore.pendingRequestData);
 
 const endpoint = computed({
@@ -41,7 +42,15 @@ const endpoint = computed({
     set: (value: ResolvableString) => requestStore.updateRequestEndpoint(value),
 });
 
+/*
+ * Composables.
+ */
+
 const { parameters, hasParameters } = useRouteParameterParsing(endpoint);
+
+/*
+ * Actions.
+ */
 
 const { handleClick: autoSelectRouteVariableSegmentWhenApplicable } =
     useRouteSegmentSelection({ endpoint });

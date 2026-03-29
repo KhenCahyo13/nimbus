@@ -13,7 +13,6 @@ export interface EnvVariablesAwareStringResult {
 
 /**
  * Composable that manages the resolution of environment variables within a string.
- * Supports both primitive strings and ResolvableObjects for backward compatibility.
  *
  * @param source - The reactive source (string or { raw: string, resolved: string }) to resolve.
  * @returns Reactive resolution state and utilities.

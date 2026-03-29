@@ -60,11 +60,6 @@ const activelyHoveredEnvVariableSegment = ref<number | null>(null);
 const inputRef = ref<ComponentPublicInstance | HTMLElement | null>(null);
 const mirrorRef = ref<HTMLDivElement | null>(null);
 
-const { scrollContainer, showLeftMask, showRightMask, updateScrollMasks } =
-    useTabHorizontalScroll({
-        SCROLL_THRESHOLD: 4,
-    });
-
 /**
  * We wrap the parent's modelValue in a proxy computed that useEnvVariablesAwareString will manage.
  */
@@ -72,8 +67,6 @@ const parentSourceProxy = computed({
     get: () => props.modelValue,
     set: (value: ResolvableString) => emit('update:modelValue', value),
 });
-
-const { raw: rawValue, segments } = useEnvVariablesAwareString(parentSourceProxy);
 
 const delegatedProps = computed(() => {
     /**
@@ -85,6 +78,17 @@ const delegatedProps = computed(() => {
 
     return rest;
 });
+
+/*
+ * Composables.
+ */
+
+const { scrollContainer, showLeftMask, showRightMask, updateScrollMasks } =
+    useTabHorizontalScroll({
+        SCROLL_THRESHOLD: 4,
+    });
+
+const { raw: rawValue, segments } = useEnvVariablesAwareString(parentSourceProxy);
 
 /*
  * Actions.
@@ -143,7 +147,7 @@ const handleMouseLeave = () => {
  * Watchers.
  */
 
-// Inbound sync: Manager -> Local Input
+// Inbound sync: Parent -> Local Input
 watch(
     rawValue,
     (newValue: string) => {
@@ -154,11 +158,15 @@ watch(
     { immediate: true },
 );
 
-// Outbound sync: Local Input -> Manager
+// Outbound sync: Local Input -> Parent
 watch(internalRawValue, (newValue: string) => {
     if (newValue !== rawValue.value) {
         rawValue.value = newValue;
     }
+});
+
+watch(internalRawValue, () => {
+    updateScrollMasks();
 });
 
 /*
@@ -175,15 +183,9 @@ onMounted(() => {
     }
 });
 
-watch(internalRawValue, () => {
-    updateScrollMasks();
-});
-
 /*
- * Helpers.
+ * Misc.
  */
-
-const sharedStyles = cn(props.inputClass);
 
 defineExpose({
     activelyHoveredEnvVariableSegment,
@@ -202,7 +204,7 @@ defineExpose({
             :class="
                 cn(
                     'caret-foreground relative z-10 h-full flex-1 bg-transparent text-transparent',
-                    sharedStyles,
+                    inputClass,
                 )
             "
             spellcheck="false"
@@ -221,7 +223,7 @@ defineExpose({
                 cn(
                     'pointer-events-none absolute inset-0 z-0 flex items-center overflow-hidden whitespace-pre',
                     inputVariants({ variant }),
-                    sharedStyles,
+                    inputClass,
                 )
             "
         >
